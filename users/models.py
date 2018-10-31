@@ -5,6 +5,7 @@ import uuid
 # Create your models here.
 class User(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.CharField(max_length=300, unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)    
     direct_manager = models.CharField(max_length=30)
