@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from .models import Question
-from .serializers import CreateQuestionsSerializer
+from .serializers import CreateQuestionsSerializer,QuestionListSerializer
 def index(request):
     response_data = {}
     response_data['result'] = 'error'
@@ -18,16 +18,25 @@ def index(request):
 class QuestionsView(APIView):
 
     @api_view(['POST'])
-    def creatQuestions(request):
+    def createQuestions(request):
         serializer = CreateQuestionsSerializer(data=request.data['mentorQuestion'])
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        print(serializer)
         request.data['menteeQuestion']['mapped']=serializer.data['question_id']
         menteeSerializer = CreateQuestionsSerializer(data=request.data['menteeQuestion'])
         menteeSerializer.is_valid(raise_exception=True)
         menteeSerializer.save()
         return Response(menteeSerializer.data, status=status.HTTP_200_OK)
+class QuestionListCreateView(ListCreateAPIView):
+    queryset = Question.objects.all().prefetch_related('answers') # nopep8
+    # queryset = Company.objects.all()  # nopep8
+    serializer_class = QuestionListSerializer
+    parser_classes = (MultiPartParser,)     
+    def list(self, request):
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        queryset = self.get_queryset()
+        serializer = QuestionListSerializer(queryset, many=True)
+        return Response(serializer.data)# class QuestionRetrieveView(RetrieveAPIView):
 
 def insertQuestions(request):
     body = request.body
