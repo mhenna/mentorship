@@ -32,9 +32,13 @@ class QuestionListCreateView(ListCreateAPIView):
     # queryset = Company.objects.all()  # nopep8
     serializer_class = QuestionListSerializer
     parser_classes = (MultiPartParser,)     
-    def list(self, request):
+    def list(self, request,mentor):
         # Note the use of `get_queryset()` instead of `self.queryset`
-        queryset = self.get_queryset()
+        if mentor == 0 :
+            is_mentor = True
+        else :
+            is_mentor = False 
+        queryset = Question.objects.filter(is_mentor=is_mentor).order_by('is_matching').prefetch_related('answers')
         serializer = QuestionListSerializer(queryset, many=True)
         return Response(serializer.data)# class QuestionRetrieveView(RetrieveAPIView):
 

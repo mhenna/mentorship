@@ -9,5 +9,5 @@ class Answer(models.Model):
     answer_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=300)
     answer_to_question = models.ForeignKey(Question,related_name='answers',on_delete=models.CASCADE)
-    answer_from_user = models.OneToOneField(User,default=None,null=True,blank=True,on_delete=models.CASCADE)
+    answer_from_user = models.ManyToManyField(User,default=None,null=True,blank=True)
     
