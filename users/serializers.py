@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_jwt import utils
 
 from .models import User
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -12,3 +13,5 @@ class CreateUserSerializer(serializers.ModelSerializer):
         if not User.objects.get(name=value):
             raise serializers.ValidationError('user doesnt exist ')
         return value
+
+

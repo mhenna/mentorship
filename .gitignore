@@ -13,3 +13,5 @@
 .env
 .coverage
 .vscode/*
+
+mentorshipenv/
