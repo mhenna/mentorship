@@ -15,9 +15,16 @@ from django.http import HttpResponse
 import json
 from .models import User
 from answers.models import Answer
-from .serializers import CreateUserSerializer,UserRetrieveSerializer
+from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
+
+class UserListCreateView(ListCreateAPIView):
+    queryset = User.objects.all() # nopep8
+    # queryset = Company.objects.all()  # nopep8
+    serializer_class = UserListSerializer
+    parser_classes = (MultiPartParser,)
+
 class UsersView(APIView):
 
     @api_view(['POST'])
