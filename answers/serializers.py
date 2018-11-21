@@ -6,7 +6,7 @@ from .models import Answer
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        exclude = ('answer_to_question','answer_to_user')
+        exclude = ('answer_from_user',)
         depth = 1
 class AnswerListSerializer(serializers.ModelSerializer):
 

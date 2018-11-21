@@ -17,3 +17,4 @@ class User(models.Model):
     work_location = models.CharField(max_length=30,null=True)
     position = models.CharField(max_length=30,null=True)
     departement = models.CharField(max_length=30,null=True)
+    pass
