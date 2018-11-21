@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework_jwt import utils
 
 from .models import User
+from answers.serializers import  AnswerSerializer
 class CreateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -14,4 +15,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('user doesnt exist ')
         return value
 
-
+class UserRetrieveSerializer(serializers.ModelSerializer):
+    answers = AnswerSerializer(many=True, read_only=True)
+    class Meta:
+        model = User
+        fields = '__all__'
