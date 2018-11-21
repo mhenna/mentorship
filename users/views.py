@@ -27,17 +27,21 @@ class UsersView(APIView):
             question = Question.objects.filter(question_id=answer['questionId'])[0]
             if (not question.user_info=="None") and (not question.user_info=="")and (not question.user_info=="None"):
                 for answertemp in answer['answer']:
-                    request.data[question.user_info]=answertemp
+                    request.data[question.user_info]=answertemp['text']
         serializer = CreateUserSerializer(data = request.data)
         serializer.is_valid(raise_exception = True)
         serializer.save()
         parsed_answers = [] 
+        print(request.data['answers'],'requestttt ')
         for question in request.data['answers']:
             for answer in question['answer']:
-                if((answer['answer_id']==None) or ( answer['answer_id']=="")):
-                    answer['answer_from_user']=serializer.data['user_id']
-                    answer['answer_to_question'] =answer['questionId']
-                    parsed_answers.append(answer)
+                print('answer',answer)                
+                if((not 'answer_id' in  answer)):
+                    answer_json = {}
+                    answer_json['answer_from_user']=[serializer.data['user_id']]
+                    answer_json['answer_to_question'] =question['questionId']
+                    answer_json['text'] = answer['text']
+                    parsed_answers.append(answer_json)
                 else :
                     tempanswer = Answer.objects.filter(answer_id=answer['answer_id'])[0]
                     tempanswer.answer_from_user.add(serializer.data['user_id'])                
@@ -45,7 +49,7 @@ class UsersView(APIView):
             answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
             answer_serializer.is_valid(raise_exception = True)
             answer_serializer.save()
-            return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
+        return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
 class UserRetrieveView(RetrieveAPIView):
     queryset = User.objects.all()     
     serializer_class = UserRetrieveSerializer
