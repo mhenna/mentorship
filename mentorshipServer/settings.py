@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'mentorshipServer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-db_name =  'mentorship_test' if env('ENV') == 'test' else 'mentorship'
+db_name =  'mentorship_test' if env('ENV') == 'test' else env('DB_NAME')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
