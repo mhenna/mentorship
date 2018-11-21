@@ -35,20 +35,22 @@ class UsersView(APIView):
         print(request.data['answers'],'requestttt ')
         for question in request.data['answers']:
             for answer in question['answer']:
-                print('answer',answer)                
                 if((not 'answer_id' in  answer)):
+                    print('answer',answer)                
                     answer_json = {}
                     answer_json['answer_from_user']=[serializer.data['user_id']]
                     answer_json['answer_to_question'] =question['questionId']
                     answer_json['text'] = answer['text']
-                    parsed_answers.append(answer_json)
+                    if(not answer_json in parsed_answers):
+                        parsed_answers.append(answer_json)
                 else :
                     tempanswer = Answer.objects.filter(answer_id=answer['answer_id'])[0]
                     tempanswer.answer_from_user.add(serializer.data['user_id'])                
                     tempanswer.save()
-            answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
-            answer_serializer.is_valid(raise_exception = True)
-            answer_serializer.save()
+        print('parsedAnswers',parsed_answers)        
+        answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
+        answer_serializer.is_valid(raise_exception = True)
+        answer_serializer.save()
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
 class UserRetrieveView(RetrieveAPIView):
     queryset = User.objects.all()     
