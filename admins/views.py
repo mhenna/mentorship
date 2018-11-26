@@ -43,7 +43,7 @@ class AdminView(APIView)
                 'Please sign-up using the following ' +
                 '<a href="{{loginUrl}}">link</a>.')
             context = Context(
-                {'loginUrl': settings.Mentor_URL,
+                {'loginUrl': settings.MENTOR_URL,
                  })
             body = template.render(context)
             emailMessage = EmailMessage('Dell Mentorship Portal', body,
@@ -58,4 +58,10 @@ class AdminView(APIView)
         except SMTPException:
             return Response({'detail': 'Internal Server Error.'},
                             status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
+
+
+    def delete(request):
+        queryset = User.objects.all()
+        queryset = queryset.filter(id=request.data['id'])
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
