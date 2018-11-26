@@ -26,3 +26,6 @@ class UserListSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
         depth = 1
+
+
+       
