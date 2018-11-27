@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 import uuid
 # Create your models here.
-class User(models.Model):
+class Employee(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.CharField(max_length=300, unique=True)
     first_name = models.CharField(max_length=30,null=True)
@@ -17,4 +17,4 @@ class User(models.Model):
     work_location = models.CharField(max_length=30,null=True)
     position = models.CharField(max_length=30,null=True)
     departement = models.CharField(max_length=30,null=True)
-    pass
+    

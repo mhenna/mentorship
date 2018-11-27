@@ -13,14 +13,14 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from django.http import HttpResponse
 import json
-from .models import User
+from .models import Employee
 from answers.models import Answer
 from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 
 class UserListCreateView(ListCreateAPIView):
-    queryset = User.objects.all() # nopep8
+    queryset = Employee.objects.all() # nopep8
     # queryset = Company.objects.all()  # nopep8
     serializer_class = UserListSerializer
     parser_classes = (MultiPartParser,)
@@ -60,7 +60,7 @@ class UsersView(APIView):
         answer_serializer.save()
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
 class UserRetrieveView(RetrieveAPIView):
-    queryset = User.objects.all()     
+    queryset = Employee.objects.all()     
     serializer_class = UserRetrieveSerializer
     def get_object(self):
         """
