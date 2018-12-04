@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import User
+from .models import Employee
 from django.urls import reverse,resolve
 from django.utils import timezone
 import json
@@ -31,7 +31,7 @@ class UserSingupTestCase(TestCase):
         jsonObiect = json.dumps(user)
         url = reverse("signup")
         resp = self.client.post(url,jsonObiect,content_type='application/json')
-        user_db = User.objects.filter(email=user['email'])[0]
+        user_db = Employee.objects.filter(email=user['email'])[0]
         self.assertEqual(user_db.first_name,user['first_name'])
         self.assertEqual(user_db.last_name, user['last_name'])
         self.assertEqual(user_db.direct_manager, user['direct_manager'])
