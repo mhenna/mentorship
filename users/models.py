@@ -17,6 +17,11 @@ class Employee(models.Model):
     work_location = models.CharField(max_length=30,null=True)
     position = models.CharField(max_length=30,null=True)
     departement = models.CharField(max_length=30,null=True)
-    matched = models.ManyToManyField('self',related_name='matches',default=None,null=True,blank=True)    
+    matched = models.ManyToManyField('self',related_name='matches',default=None,null=True,blank=True) 
+    def __str__(self):
+        return self.email+" -- "+str(self.user_id)
+
+
+   
     # matched = models.ForeignKey('self',related_name='matches',on_delete=models.CASCADE, null=True)
     

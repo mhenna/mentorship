@@ -10,5 +10,5 @@ class Answer(models.Model):
     text = models.CharField(max_length=300)
     answer_to_question = models.ForeignKey(Question,related_name='answers',on_delete=models.CASCADE,default=None,null=True)
     answer_from_user = models.ManyToManyField(Employee, related_name='answers_from',default=None,null=True)
-    
-    
+    def __str__(self):
+        return self.text
