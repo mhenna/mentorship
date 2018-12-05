@@ -3,6 +3,14 @@ from django.db import models
 # Create your models here.
 import uuid
 # Create your models here.
+
+
+
+class Skill(models.Model):
+    name = models.CharField(max_length=30,unique=True,null=True)
+    type = models.CharField(max_length=30,null=True)
+
+
 class Employee(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.CharField(max_length=300, unique=True)
@@ -18,5 +26,9 @@ class Employee(models.Model):
     position = models.CharField(max_length=30,null=True)
     departement = models.CharField(max_length=30,null=True)
     matched = models.ManyToManyField("self",related_name='matches',default=None,blank=True)    
+    skills = models.ManyToManyField(Skill, related_name='employees')
     # matched = models.ForeignKey('self',related_name='matches',on_delete=models.CASCADE, null=True)
+
+
+
     

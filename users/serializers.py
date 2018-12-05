@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_jwt import utils
 
-from .models import Employee
+from .models import Employee, Skill
 from answers.serializers import  AnswerSerializer
 class CreateUserSerializer(serializers.ModelSerializer):
 
@@ -28,4 +28,7 @@ class UserListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-       
+class SkillsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = '__all__'
