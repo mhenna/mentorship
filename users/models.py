@@ -27,6 +27,12 @@ class Employee(models.Model):
     departement = models.CharField(max_length=30,null=True)
     matched = models.ManyToManyField("self",related_name='matches',default=None,blank=True)    
     skills = models.ManyToManyField(Skill, related_name='employees')
+   
+    def __str__(self):
+        return self.email+" -- "+str(self.user_id)
+
+
+   
     # matched = models.ForeignKey('self',related_name='matches',on_delete=models.CASCADE, null=True)
 
 
