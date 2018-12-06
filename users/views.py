@@ -59,6 +59,28 @@ class UsersView(APIView):
         answer_serializer.is_valid(raise_exception = True)
         answer_serializer.save()
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
+    @api_view(['POST'])    
+    def matchUsers(request):
+        print(request.data)
+        print('mentor',request.data['menteeId'])
+        print('mentor',request.data['mentorId'])
+        mentor = Employee.objects.filter(user_id=request.data['mentorId'])[0]
+        mentee = Employee.objects.filter(user_id=request.data['menteeId'])[0]
+        mentor.matched.add(request.data['menteeId'])
+        mentor.save()  
+        return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
+    
+    @api_view(['POST'])    
+    def unMatchUsers(request):
+        print(request.data)
+        print('mentor',request.data['menteeId'])
+        print('mentor',request.data['mentorId'])
+        mentor = Employee.objects.filter(user_id=request.data['mentorId'])[0]
+        mentee = Employee.objects.filter(user_id=request.data['menteeId'])[0]
+        mentor.matched.remove(request.data['menteeId'])
+        mentor.save()  
+        return Response({"message":"user unmatched successfully"}, status=status.HTTP_200_OK)
+    
 class UserRetrieveView(RetrieveAPIView):
     queryset = Employee.objects.all()     
     serializer_class = UserRetrieveSerializer
@@ -95,3 +117,5 @@ class UserRetrieveView(RetrieveAPIView):
         # print(answers,'answerssss')
         # obj.answers.set(answers)
         return obj
+
+
