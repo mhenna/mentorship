@@ -4,7 +4,7 @@ from django.db.models import Count
 # Create your views here.
 from django.shortcuts import render
 from django.http import Http404
-from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIView, UpdateAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,9 +13,9 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from django.http import HttpResponse
 import json
-from .models import Employee
+from .models import Employee, Skill
 from answers.models import Answer
-from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer
+from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer, SkillsListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 
@@ -24,6 +24,22 @@ class UserListCreateView(ListCreateAPIView):
     # queryset = Company.objects.all()  # nopep8
     serializer_class = UserListSerializer
     parser_classes = (MultiPartParser,)
+
+
+
+class SkillListCreateView(ListCreateAPIView):
+    queryset = Skill.objects.all()
+    serializer_class = SkillsListSerializer
+
+
+
+class AddSkill(UpdateAPIView):
+    queryset= Employee.objects.all() 
+    serializer_class = UserListSerializer
+    def put(self, data, format=None):
+        queryset = Employee.objects.get(id=self.request.data['id'])
+        queryset.skills.add(self.request.data['Skill'])
+        return Response(status=status.HTTP_200_OK)
 
 class UsersView(APIView):
 
