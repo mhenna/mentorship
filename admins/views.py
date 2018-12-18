@@ -69,10 +69,11 @@ class AdminView(APIView):
 
 
     @api_view(['POST'])
+    @permission_classes([IsAdmin])
     def SendEmail(request):
         try:
-            mentors = Employee.objects.filter(is_mentor == True)
-            mentees = Employee.objects.filter(is_mentor == False)
+            mentors = Employee.objects.filter(is_mentor=True)
+            mentees = Employee.objects.filter(is_mentor=False)
             list = []
             template = Template(
                 '<p>{{body}}</p>')
@@ -80,22 +81,24 @@ class AdminView(APIView):
                 {'body': request.data.get('emailBody'),
                  })
             body = template.render(context)
-            if (request.body.get('type')=='mentors'):
+            if (request.data.get('type')=='mentors'):
                 for email in mentors:
                     list.append(email.email)
                 emailMessage = EmailMessage('Dell Mentorship Portal', body,
                                             'mentorship@dell.com',
                                             list)
-            if (request.body.get('type')=='mentees'):
+            if (request.data.get('type')=='mentees'):
                 for email in mentees:
                     list.append(email.email)
                 emailMessage = EmailMessage('Dell Mentorship Portal', body,
                                             'mentorship@dell.com',
                                             list)
-            if (request.body.get('type')=='seperate'):
+            if (request.data.get('type')=='seperate'):
                 emailMessage = EmailMessage('Dell Mentorship Portal', body,
                                         'mentorship@dell.com',
                                         [request.data.get('email')])
+                print(request.data)
+                print(request.data.get('emailBody'))
             emailMessage.content_subtype = "html"
             emailMessage.send()
             

@@ -7,4 +7,4 @@ class Cycle(models.Model):
     start_date = models.DateTimeField(auto_now=False, auto_now_add=False)
     end_date = models.DateTimeField(auto_now=False, auto_now_add=False)
     deadline = models.DateTimeField(auto_now=False, auto_now_add=False)
-    skills = models.ManyToManyField(Skill, related_name='cycles')
+    skills = models.ManyToManyField(Skill, related_name='cycles', blank=True)
