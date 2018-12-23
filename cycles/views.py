@@ -50,9 +50,8 @@ class CycleEditView(APIView):
         query = Cycle.objects.get(id=request.data['id'])
         query.start_date = request.data['start_date']
         query.end_date = request.data['end_date']
-        query.deadline = request.data['deadline']
         query.name = request.data['name']
-        query.save(update_fields=['start_date','end_date','deadline','name'])
+        query.save(update_fields=['start_date','end_date','name'])
         
         serializer_class = CycleListSerializer
         return Response(status=status.HTTP_200_OK)

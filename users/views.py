@@ -56,12 +56,7 @@ def create_user(request):
 
 def add_user_cycle(serializer):
         latest_cycle = Cycle.objects.latest('creation_date')
-        if(serializer.data['is_mentor']==True):
-            latest_cycle.mentors.add(serializer.data['user_id'])
-            latest_cycle.save()
-        else:
-            latest_cycle.mentees.add(serializer.data['user_id'])
-            latest_cycle.save()
+        serializer.data['cycles'].add(lastest_cycle.id)
 
 
 def insert_answers(request,serializer):

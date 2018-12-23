@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 import uuid
+
 # Create your models here.
 
 
@@ -10,6 +11,9 @@ class Skill(models.Model):
     name = models.CharField(max_length=30,unique=True,null=True)
     type = models.CharField(max_length=30,null=True)
 
+
+
+from cycles.models import Cycle
 
 class Employee(models.Model):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -27,7 +31,7 @@ class Employee(models.Model):
     departement = models.CharField(max_length=30,null=True)
     matched = models.ManyToManyField("self",related_name='matches',default=None,blank=True)    
     skills = models.ManyToManyField(Skill, related_name='employees')
-    cycles = models.ManyToManyField(Skill, related_name='employee')
+    cycles = models.ManyToManyField(Cycle, related_name='employee')
    
     def __str__(self):
         return self.email+" -- "+str(self.user_id)
