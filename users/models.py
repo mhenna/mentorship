@@ -27,6 +27,7 @@ class Employee(models.Model):
     departement = models.CharField(max_length=30,null=True)
     matched = models.ManyToManyField("self",related_name='matches',default=None,blank=True)    
     skills = models.ManyToManyField(Skill, related_name='employees')
+    cycles = models.ManyToManyField(Skill, related_name='employee')
    
     def __str__(self):
         return self.email+" -- "+str(self.user_id)
