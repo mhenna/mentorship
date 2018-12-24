@@ -13,13 +13,13 @@ class IsAdmin(permissions.BasePermission):
         "detail": "You do not have permission to perform this action."}
 
     def has_permission(self, request, view):
-        print(request.META.get('HTTP_AUTHORIZATION'))
+        
        
         try:
             DecodedUser = utils.jwt_decode_handler(
                 request.META.get('HTTP_AUTHORIZATION')
             )
-            print(DecodedUser)
+           
            
             user = User.objects.get(email=DecodedUser['email'])
             if user.is_superuser:
