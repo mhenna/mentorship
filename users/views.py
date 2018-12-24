@@ -15,6 +15,7 @@ from django.http import HttpResponse
 import json
 from .models import Employee, Skill
 from answers.models import Answer
+from cycles.models import Cycle
 from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer, SkillsListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
@@ -41,40 +42,57 @@ class AddSkill(UpdateAPIView):
         queryset.skills.add(self.request.data['Skill'])
         return Response(status=status.HTTP_200_OK)
 
-class UsersView(APIView):
-
-    @api_view(['POST'])
-    def createUser(request):
-        userdata = {}
+def create_user(request):
         for answer in request.data['answers']:
             question = Question.objects.filter(question_id=answer['questionId'])[0]
-            if (not question.user_info=="None") and (not question.user_info=="")and (not question.user_info=="None"):
+            if (not question.user_info=="None") and (not question.user_info==""):
                 for answertemp in answer['answer']:
                     request.data[question.user_info]=answertemp['text']
         serializer = CreateUserSerializer(data = request.data)
         serializer.is_valid(raise_exception = True)
         serializer.save()
+        return serializer
+
+def add_user_cycle(serializer):
+        latest_cycle = Cycle.objects.latest('creation_date')
+        if(serializer.data['is_mentor']==True):
+            latest_cycle.mentors.add(serializer.data['user_id'])
+            latest_cycle.save()
+        else:
+            latest_cycle.mentees.add(serializer.data['user_id'])
+            latest_cycle.save()
+
+
+def insert_answers(request,serializer):
         parsed_answers = [] 
-        print(request.data['answers'],'requestttt ')
         for question in request.data['answers']:
             for answer in question['answer']:
-                if((not 'answer_id' in  answer)):
-                    print('answer',answer)                
+                if((not 'answer_id' in  answer)):       #if the answer doesn't exist in the   databse then it will create a new one using answerSerializer
                     answer_json = {}
                     answer_json['answer_from_user']=[serializer.data['user_id']]
                     answer_json['answer_to_question'] =question['questionId']
                     answer_json['text'] = answer['text']
                     if(not answer_json in parsed_answers):
                         parsed_answers.append(answer_json)
-                else :
+                else :                                                                              # else  it will just adjust the manyTomany field     
                     tempanswer = Answer.objects.filter(answer_id=answer['answer_id'])[0]
                     tempanswer.answer_from_user.add(serializer.data['user_id'])                
-                    tempanswer.save()
-        print('parsedAnswers',parsed_answers)        
+                    tempanswer.save()      
         answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
         answer_serializer.is_valid(raise_exception = True)
         answer_serializer.save()
+
+        
+class UsersView(APIView):
+    
+    @api_view(['POST'])
+    def signup(request):
+        serializer = create_user(request)
+        add_user_cycle(serializer)
+        insert_answers(request,serializer)
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
+
+
     @api_view(['POST'])    
     def matchUsers(request):
         print(request.data)
