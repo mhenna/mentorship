@@ -6,14 +6,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CycleListSerializer, CycleSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from .models import Cycle
+from admins.permissions import IsAdmin
 
 
 class CycleListCreateView(ListCreateAPIView):
     queryset = Cycle.objects.all()
   
     serializer_class = CycleListSerializer
+    permission_classes = (IsAdmin,)
 
 
 class CycleListView(ListAPIView):
@@ -25,6 +27,7 @@ class CycleListView(ListAPIView):
 class AddSkill(UpdateAPIView):
     queryset= Cycle.objects.all() 
     serializer_class = CycleListSerializer
+    permission_classes = (IsAdmin,)
     def put(self, data, format=None):
         queryset = Cycle.objects.get(id=self.request.data['id'])
         queryset.skills.add(self.request.data['skill'])
@@ -34,6 +37,7 @@ class AddSkill(UpdateAPIView):
 class CycleEditView(APIView):
 
     @api_view(['DELETE'])
+    @permission_classes([IsAdmin])
     def DeleteCycle(request):
         queryset = Cycle.objects.all()
         queryset = queryset.filter(id=request.data['id'])
@@ -41,6 +45,7 @@ class CycleEditView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @api_view(['PUT'])
+    @permission_classes([IsAdmin])
     def EditCycle(request):
         query = Cycle.objects.get(id=request.data['id'])
         query.start_date = request.data['start_date']
@@ -58,6 +63,7 @@ class CycleEditView(APIView):
 class CycleRetrieveView(RetrieveAPIView):
     queryset = Cycle.objects.all()
     serializer_class = CycleSerializer
+    permission_classes = (IsAdmin,)
 
     def get_object(self):
         """

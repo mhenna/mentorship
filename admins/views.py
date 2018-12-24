@@ -66,3 +66,46 @@ class AdminView(APIView):
         queryset = queryset.filter(user_id=request.data['user_id'])
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+    @api_view(['POST'])
+    @permission_classes([IsAdmin])
+    def SendEmail(request):
+        try:
+            mentors = Employee.objects.filter(is_mentor=True)
+            mentees = Employee.objects.filter(is_mentor=False)
+            list = []
+            template = Template(
+                '<p>{{body}}</p>')
+            context = Context(
+                {'body': request.data.get('emailBody'),
+                 })
+            body = template.render(context)
+            if (request.data.get('type')=='mentors'):
+                for email in mentors:
+                    list.append(email.email)
+                emailMessage = EmailMessage('Dell Mentorship Portal', body,
+                                            'mentorship@dell.com',
+                                            list)
+            if (request.data.get('type')=='mentees'):
+                for email in mentees:
+                    list.append(email.email)
+                emailMessage = EmailMessage('Dell Mentorship Portal', body,
+                                            'mentorship@dell.com',
+                                            list)
+            if (request.data.get('type')=='seperate'):
+                emailMessage = EmailMessage('Dell Mentorship Portal', body,
+                                        'mentorship@dell.com',
+                                        [request.data.get('email')])
+                print(request.data)
+                print(request.data.get('emailBody'))
+            emailMessage.content_subtype = "html"
+            emailMessage.send()
+            
+            return Response({'detail': 'Email sent'},
+                            status=status.HTTP_200_OK)
+           
+        except SMTPException:
+            return Response({'detail': 'Internal Server Error.'},
+                            status.HTTP_500_INTERNAL_SERVER_ERROR)
+
