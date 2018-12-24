@@ -5,7 +5,8 @@ from users.models import Skill
 from django.utils import timezone
 # Create your models here.
 class Deadline(models.Model):
-    registration = models.DateTimeField(auto_now=False, auto_now_add=False)
+    mentor_registration = models.DateTimeField(auto_now=False, auto_now_add=False)
+    mentee_registration = models.DateTimeField(auto_now=False, auto_now_add=False)
 # Create your models here.
 class Cycle(models.Model):
    

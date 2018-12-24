@@ -20,6 +20,7 @@ from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
 from django.utils import timezone
+from cycles.models import Cycle
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
@@ -52,15 +53,21 @@ def create_user(request):
         serializer = CreateUserSerializer(data = request.data)
         serializer.is_valid(raise_exception = True)
         serializer.save()
+        
         return serializer
 
 def add_user_cycle(serializer):
-        latest_cycle = Cycle.objects.latest('creation_date')
-        serializer.data['cycles'].add(lastest_cycle.id)
+        cycle = Cycle.objects.latest('creation_date')
+        user = Employee.objects.get(email=serializer.data['email'])
+        user.cycles.add(cycle.id)
+        
+
 
 
 def insert_answers(request,serializer):
         parsed_answers = [] 
+       
+
         for question in request.data['answers']:
             for answer in question['answer']:
                 if((not 'answer_id' in  answer)):       #if the answer doesn't exist in the   databse then it will create a new one using answerSerializer
@@ -83,14 +90,28 @@ class UsersView(APIView):
     
     @api_view(['POST'])
     def signup(request):
-        now = timezone.now()
-        if now > deadline.registration:
-            return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
+        deadline = Deadline.objects.first()
+        now = timezone.now()   
+          
+        
+        
+        if request.data['is_mentor']==True:
+            if now < deadline.mentor_registration:
+                return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                serializer = create_user(request)
+                user=add_user_cycle(serializer)
+                insert_answers(request,user)
+                return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
         else:
-            serializer = create_user(request)
-            add_user_cycle(serializer)
-            insert_answers(request,serializer)
-            return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
+            if now > deadline.mentee_registration:
+                return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                serializer = create_user(request)
+                user=add_user_cycle(serializer)
+                insert_answers(request,user)
+                return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
+
 
     @api_view(['POST'])    
     def matchUsers(request):
