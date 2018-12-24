@@ -42,6 +42,17 @@ class QuestionListCreateView(ListCreateAPIView):
         serializer = QuestionListSerializer(queryset, many=True)
         return Response(serializer.data)# class QuestionRetrieveView(RetrieveAPIView):
 
+class QuestionListView(ListCreateAPIView):
+    queryset = Question.objects.all().prefetch_related('answers') # nopep8
+    # queryset = Company.objects.all()  # nopep8
+    serializer_class = QuestionListSerializer
+    parser_classes = (MultiPartParser,)     
+    def list(self, request):
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        queryset = Question.objects.all().prefetch_related('answers') # nopep8        
+        serializer = QuestionListSerializer(queryset, many=True)
+        return Response(serializer.data)# class QuestionRetrieveView(RetrieveAPIView):
+
 def insertQuestions(request):
     body = request.body
     questions = json.loads(body)

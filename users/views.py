@@ -15,6 +15,7 @@ from django.http import HttpResponse
 import json
 from .models import Employee, Skill
 from answers.models import Answer
+from cycles.models import Cycle
 from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer, SkillsListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
@@ -66,8 +67,6 @@ def add_user_cycle(serializer):
 
 def insert_answers(request,serializer):
         parsed_answers = [] 
-       
-
         for question in request.data['answers']:
             for answer in question['answer']:
                 if((not 'answer_id' in  answer)):       #if the answer doesn't exist in the   databse then it will create a new one using answerSerializer
