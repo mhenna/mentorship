@@ -19,6 +19,9 @@ from cycles.models import Cycle
 from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer, SkillsListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
+from cycles.models import Deadline
+from django.utils import timezone
+from cycles.models import Cycle
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
@@ -51,16 +54,15 @@ def create_user(request):
         serializer = CreateUserSerializer(data = request.data)
         serializer.is_valid(raise_exception = True)
         serializer.save()
+        
         return serializer
 
 def add_user_cycle(serializer):
-        latest_cycle = Cycle.objects.latest('creation_date')
-        if(serializer.data['is_mentor']==True):
-            latest_cycle.mentors.add(serializer.data['user_id'])
-            latest_cycle.save()
-        else:
-            latest_cycle.mentees.add(serializer.data['user_id'])
-            latest_cycle.save()
+        cycle = Cycle.objects.latest('creation_date')
+        user = Employee.objects.get(email=serializer.data['email'])
+        user.cycles.add(cycle.id)
+        
+
 
 
 def insert_answers(request,serializer):
@@ -87,9 +89,19 @@ class UsersView(APIView):
     
     @api_view(['POST'])
     def signup(request):
+        deadline = Deadline.objects.first()
+        now = timezone.now()   
+          
+        
+        
+        if (request.data['is_mentor']==True) && (now > deadline.mentor_registration):
+            return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
+        if now > deadline.mentee_registration:
+            return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
+            
         serializer = create_user(request)
-        add_user_cycle(serializer)
-        insert_answers(request,serializer)
+        user=add_user_cycle(serializer)
+        insert_answers(request,user)
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
 
 

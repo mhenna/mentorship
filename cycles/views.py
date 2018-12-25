@@ -5,9 +5,10 @@ from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIV
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CycleListSerializer, CycleSerializer
+from .serializers import CycleListSerializer, CycleSerializer, DeadlineListSerializer
 from rest_framework.decorators import api_view, permission_classes
-from .models import Cycle
+from .models import Cycle, Deadline
+
 from admins.permissions import IsAdmin
 
 
@@ -21,6 +22,10 @@ class CycleListCreateView(ListCreateAPIView):
 class CycleListView(ListAPIView):
     queryset = Cycle.objects.all()
     serializer_class = CycleSerializer
+    permission_classes = (IsAdmin,)
+
+
+
 
 
 
@@ -33,6 +38,9 @@ class AddSkill(UpdateAPIView):
         queryset.skills.add(self.request.data['skill'])
         return Response(status=status.HTTP_200_OK)
 
+class AddDeadline(ListCreateAPIView):
+    queryset = Deadline.objects.all()
+    serializer_class= DeadlineListSerializer
 
 class CycleEditView(APIView):
 
@@ -50,9 +58,8 @@ class CycleEditView(APIView):
         query = Cycle.objects.get(id=request.data['id'])
         query.start_date = request.data['start_date']
         query.end_date = request.data['end_date']
-        query.deadline = request.data['deadline']
         query.name = request.data['name']
-        query.save(update_fields=['start_date','end_date','deadline','name'])
+        query.save(update_fields=['start_date','end_date','name'])
         
         serializer_class = CycleListSerializer
         return Response(status=status.HTTP_200_OK)

@@ -3,6 +3,7 @@ from rest_framework_jwt import utils
 from jwt import DecodeError
 from rest_framework.exceptions import AuthenticationFailed
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth.models import User
 
 
 class IsAdmin(permissions.BasePermission):
@@ -12,11 +13,15 @@ class IsAdmin(permissions.BasePermission):
         "detail": "You do not have permission to perform this action."}
 
     def has_permission(self, request, view):
+        
+       
         try:
-            user = utils.jwt_decode_handler(
+            DecodedUser = utils.jwt_decode_handler(
                 request.META.get('HTTP_AUTHORIZATION')
             )
-            request.user = user
+           
+           
+            user = User.objects.get(email=DecodedUser['email'])
             if user.is_superuser:
                 return True
             return False
