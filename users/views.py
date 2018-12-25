@@ -94,14 +94,8 @@ class UsersView(APIView):
           
         
         
-        if request.data['is_mentor']==True:
-            if now < deadline.mentor_registration:
-                return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                serializer = create_user(request)
-                user=add_user_cycle(serializer)
-                insert_answers(request,user)
-                return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
+        if (request.data['is_mentor']==True) && (now > deadline.mentor_registration):
+            return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             if now > deadline.mentee_registration:
                 return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
