@@ -77,7 +77,7 @@ def insert_answers(request,serializer):
                     if(not answer_json in parsed_answers):
                         parsed_answers.append(answer_json)
                 else :                                                                              # else  it will just adjust the manyTomany field     
-                    tempanswer = Answer.objects.filter(answer_id=answer['answer_id'])[0]
+                    tempanswer = Answer.objects.filter(id=answer['answer_id'])[0]
                     tempanswer.answer_from_user.add(serializer.data['user_id'])                
                     tempanswer.save()      
         answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
@@ -94,7 +94,7 @@ class UsersView(APIView):
           
         
         
-        if (request.data['is_mentor']==True) && (now > deadline.mentor_registration):
+        if (request.data['is_mentor']==True) and (now > deadline.mentor_registration):
             return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
         if now > deadline.mentee_registration:
             return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
