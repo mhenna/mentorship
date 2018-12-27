@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'corsheaders',
     'admins',
     'cycles'
@@ -92,7 +93,8 @@ WSGI_APPLICATION = 'mentorshipServer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-db_name =  'mentorship_test' if env('ENV') == 'test' else env('DB_NAME')
+db_name =  env('DB_NAME')
+print(db_name,"HHHHHHHHHHHHH")
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

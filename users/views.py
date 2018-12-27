@@ -77,7 +77,7 @@ def insert_answers(request,serializer):
                     if(not answer_json in parsed_answers):
                         parsed_answers.append(answer_json)
                 else :                                                                              # else  it will just adjust the manyTomany field     
-                    tempanswer = Answer.objects.filter(id=answer['answer_id'])[0]
+                    tempanswer = Answer.objects.filter(answer_id=answer['answer_id'])[0]
                     tempanswer.answer_from_user.add(serializer.data['user_id'])                
                     tempanswer.save()      
         answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
