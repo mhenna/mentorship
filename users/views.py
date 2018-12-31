@@ -71,14 +71,14 @@ def insert_answers(request,serializer):
             for answer in question['answer']:
                 if((not 'answer_id' in  answer)):       #if the answer doesn't exist in the   databse then it will create a new one using answerSerializer
                     answer_json = {}
-                    answer_json['answer_from_user']=[serializer.data['user_id']]
+                    answer_json['answer_from_user']=[serializer.data['id']]
                     answer_json['answer_to_question'] =question['questionId']
                     answer_json['text'] = answer['text']
                     if(not answer_json in parsed_answers):
                         parsed_answers.append(answer_json)
                 else :                                                                              # else  it will just adjust the manyTomany field     
                     tempanswer = Answer.objects.filter(answer_id=answer['answer_id'])[0]
-                    tempanswer.answer_from_user.add(serializer.data['user_id'])                
+                    tempanswer.answer_from_user.add(serializer.data['id'])                
                     tempanswer.save()      
         answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
         answer_serializer.is_valid(raise_exception = True)
@@ -110,8 +110,8 @@ class UsersView(APIView):
         print(request.data)
         print('mentor',request.data['menteeId'])
         print('mentor',request.data['mentorId'])
-        mentor = Employee.objects.filter(user_id=request.data['mentorId'])[0]
-        mentee = Employee.objects.filter(user_id=request.data['menteeId'])[0]
+        mentor = Employee.objects.filter(id=request.data['mentorId'])[0]
+        mentee = Employee.objects.filter(id=request.data['menteeId'])[0]
         mentor.matched.add(request.data['menteeId'])
         mentor.save()  
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
@@ -121,8 +121,8 @@ class UsersView(APIView):
         print(request.data)
         print('mentor',request.data['menteeId'])
         print('mentor',request.data['mentorId'])
-        mentor = Employee.objects.filter(user_id=request.data['mentorId'])[0]
-        mentee = Employee.objects.filter(user_id=request.data['menteeId'])[0]
+        mentor = Employee.objects.filter(id=request.data['mentorId'])[0]
+        mentee = Employee.objects.filter(id=request.data['menteeId'])[0]
         mentor.matched.remove(request.data['menteeId'])
         mentor.save()  
         return Response({"message":"user unmatched successfully"}, status=status.HTTP_200_OK)

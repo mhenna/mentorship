@@ -7,10 +7,11 @@ from questions.models import Question
 from users.models import Employee
 # Create your models here.
 class Answer(models.Model):
-    answer_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    text = HStoreField(models.CharField(max_length=100, blank=True, null = True))
+    # text = HStoreField(models.CharField(max_length=100, blank=True, null = True))
+    text = ArrayField(models.CharField(max_length=200), blank=True)
     answer_to_question = models.ForeignKey(Question,related_name='answers',on_delete=models.CASCADE,default=None,null=True)
-    answer_from_user = models.ManyToManyField(Employee, related_name='answers_from',default=None)
+    answer_from_user = models.ForeignKey(Employee, related_name='answers_from',default=None, null=True, on_delete=models.CASCADE)
+    original =  models.BooleanField(default=False)
     
  
     def __str__(self):
