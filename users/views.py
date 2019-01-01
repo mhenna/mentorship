@@ -27,7 +27,7 @@ class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
     # queryset = Company.objects.all()  # nopep8
     serializer_class = UserListSerializer
-    parser_classes = (MultiPartParser,)
+    # parser_classes = (MultiPartParser,)
 
 
 
@@ -130,6 +130,7 @@ class UsersView(APIView):
 class UserRetrieveView(RetrieveAPIView):
     queryset = Employee.objects.all()     
     serializer_class = UserRetrieveSerializer
+    lookup_field='email'
     def get_object(self):
         """
         Returns the object the view is displaying.
