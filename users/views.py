@@ -13,10 +13,10 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from django.http import HttpResponse
 import json
-from .models import Employee, Skill
+from .models import Employee
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer, SkillsListSerializer
+from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -31,9 +31,9 @@ class UserListCreateView(ListCreateAPIView):
 
 
 
-class SkillListCreateView(ListCreateAPIView):
-    queryset = Skill.objects.all()
-    serializer_class = SkillsListSerializer
+# class SkillListCreateView(ListCreateAPIView):
+#     queryset = Skill.objects.all()
+#     serializer_class = SkillsListSerializer
 
 
 
