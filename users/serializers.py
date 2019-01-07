@@ -22,6 +22,25 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserListSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        from django.utils import timezone
+        from cycles.models import Deadline
+        print(data['email'])
+        print("DAAATTTAAAAAAAAAAA")
+        deadline = Deadline.objects.first()
+        now = timezone.now()
+        if data['is_mentor'] == True :
+            if now > deadline.mentor_registration:
+            #    datetime.date(datetime.today()) > form.date_deadline:
+                message = 'You\'ve reached the deadline for the registration.'
+                raise serializers.ValidationError(message)
+        else:
+            if data['is_mentor'] == False :
+                if now > deadline.mentee_registration:
+                    message = 'You\'ve reached the deadline for the registration.'
+                    raise serializers.ValidationError(message)
+
+        return data
     class Meta:
         model = Employee
         fields = '__all__'
