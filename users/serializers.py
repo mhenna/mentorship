@@ -48,7 +48,7 @@ class UserListSerializer(serializers.ModelSerializer):
         if not regex.match(value):
             raise serializers.ValidationError(
                 'Must register using a dell domain.')
-        if User.objects.filter(email=value):
+        if Employee.objects.filter(email=value):
             raise serializers.ValidationError('Email already registered.')
         return value
     class Meta:
