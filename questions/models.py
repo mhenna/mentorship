@@ -3,7 +3,6 @@ import uuid
 # Create your models here.
 class Question(models.Model):
     
-    question_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     question_text = models.CharField(max_length=300)
     is_matching = models.BooleanField(default=False)
     is_mentor = models.BooleanField(default=False)

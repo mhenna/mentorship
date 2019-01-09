@@ -1,7 +1,7 @@
 
 from rest_framework import serializers
-from .models import Cycle, Deadline
-from users.serializers import SkillsListSerializer
+from .models import Cycle, Deadline, Skill
+
 
 
 
@@ -18,6 +18,11 @@ class DeadlineListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SkillsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = '__all__'
+
 class CycleSerializer(serializers.ModelSerializer):
     skills = SkillsListSerializer(many=True, read_only=True)
     class Meta:
@@ -25,3 +30,4 @@ class CycleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
     
+
