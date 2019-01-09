@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_jwt import utils
-
+import re
 from .models import Employee
 from answers.serializers import  AnswerSerializer
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -25,8 +25,7 @@ class UserListSerializer(serializers.ModelSerializer):
     def validate(self, data):
         from django.utils import timezone
         from cycles.models import Deadline
-        print(data['email'])
-        print("DAAATTTAAAAAAAAAAA")
+        
         deadline = Deadline.objects.first()
         now = timezone.now()
         if data['is_mentor'] == True :
@@ -41,6 +40,17 @@ class UserListSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(message)
 
         return data
+
+
+    def validate_email(self, value):
+        regex = re.compile(
+            '^[a-zA-Z0-9_.+-]+@(?:(?:[a-zA-Z0-9-]+.)?[a-zA-Z]+.)?(dell|emc).com$')
+        if not regex.match(value):
+            raise serializers.ValidationError(
+                'Must register using a dell domain.')
+        if User.objects.filter(email=value):
+            raise serializers.ValidationError('Email already registered.')
+        return value
     class Meta:
         model = Employee
         fields = '__all__'
