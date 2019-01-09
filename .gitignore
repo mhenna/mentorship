@@ -9,11 +9,12 @@
 */*/__pycache__/
 
 */__pycache__/*
-
+*/migrations/*
 .env
 .coverage
 .vscode/*
 
 mentorshipenv/
 
-*/migrations/*
+**/migrations/
+**/**/migrations
