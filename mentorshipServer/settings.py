@@ -35,18 +35,22 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
-    'answers.apps.AnswersConfig',        
-    'users.apps.UsersConfig',    
-    'questions.apps.QuestionsConfig',
+    # 'answers.apps.AnswersConfig',        
+    # 'users.apps.UsersConfig',    
+    # 'questions.apps.QuestionsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'corsheaders',
     'admins',
-    'cycles'
+    'cycles',
+    'users',
+    'questions',
+    'answers'
 ]
 
 REST_FRAMEWORK = {
@@ -92,7 +96,8 @@ WSGI_APPLICATION = 'mentorshipServer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-db_name =  'mentorship_test' if env('ENV') == 'test' else env('DB_NAME')
+db_name =  env('DB_NAME')
+print(db_name,"HHHHHHHHHHHHH")
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

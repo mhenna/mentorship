@@ -5,9 +5,9 @@ from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIV
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CycleListSerializer, CycleSerializer, DeadlineListSerializer
+from .serializers import CycleListSerializer, CycleSerializer, DeadlineListSerializer, SkillsListSerializer
 from rest_framework.decorators import api_view, permission_classes
-from .models import Cycle, Deadline
+from .models import Cycle, Deadline, Skill
 
 from admins.permissions import IsAdmin
 
@@ -26,6 +26,9 @@ class CycleListView(ListAPIView):
 
 
 
+class SkillListCreateView(ListCreateAPIView):
+    queryset = Skill.objects.all()
+    serializer_class = SkillsListSerializer
 
 
 

@@ -2,21 +2,16 @@ from django.db import models
 
 # Create your models here.
 import uuid
-
+from cycles.models import Cycle, Skill
 # Create your models here.
 
 
 
-class Skill(models.Model):
-    name = models.CharField(max_length=30,unique=True,null=True)
-    type = models.CharField(max_length=30,null=True)
 
 
 
-from cycles.models import Cycle
 
 class Employee(models.Model):
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.CharField(max_length=300, unique=True)
     first_name = models.CharField(max_length=30,null=True)
     last_name = models.CharField(max_length=30,null=True)    
