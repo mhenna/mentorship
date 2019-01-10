@@ -78,3 +78,12 @@ class QuestionsList(ListAPIView):
 class QuestionsListCreate(ListCreateAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionListSerializer 
+
+class Edit(APIView):
+
+    @api_view(['DELETE'])
+    def Delete(request):
+        queryset = Question.objects.all()
+        queryset = queryset.filter(id=request.data['id'])
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
