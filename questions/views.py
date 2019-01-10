@@ -67,6 +67,14 @@ from .serializers import CreateQuestionsSerializer,QuestionListSerializer
 #     response_data['message'] ='Some error message'   
 #     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+class QuestionsList(ListAPIView):
+    
+    serializer_class = QuestionListSerializer 
+    def get_queryset(self):
+        mentor = self.kwargs['type']
+        queryset = Question.objects.filter(is_mentor=mentor)
+        return queryset
+
 class QuestionsListCreate(ListCreateAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionListSerializer 

@@ -71,6 +71,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+# FIXTURE_DIRS = ( os.path.join(BASE_DIR, 'questions','fixtures'))
+
+
 
 ROOT_URLCONF = 'mentorshipServer.urls'
 
