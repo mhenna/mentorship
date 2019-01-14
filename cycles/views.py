@@ -16,13 +16,13 @@ class CycleListCreateView(ListCreateAPIView):
     queryset = Cycle.objects.all()
   
     serializer_class = CycleListSerializer
-    permission_classes = (IsAdmin,)
+    # permission_classes = (IsAdmin,)
 
 
 class CycleListView(ListAPIView):
     queryset = Cycle.objects.all()
     serializer_class = CycleSerializer
-    permission_classes = (IsAdmin,)
+    # permission_classes = (IsAdmin,)
 
 
 
@@ -73,7 +73,8 @@ class CycleEditView(APIView):
 class CycleRetrieveView(RetrieveAPIView):
     queryset = Cycle.objects.all()
     serializer_class = CycleSerializer
-    permission_classes = (IsAdmin,)
+    # permission_classes = (IsAdmin,)
+  
 
     def get_object(self):
         """
@@ -96,7 +97,7 @@ class CycleRetrieveView(RetrieveAPIView):
         queryset = queryset.filter(**filter_kwargs)
         if not queryset:
             raise Http404('Not found.')
-        queryset = queryset.prefetch_related('skills')
+        queryset = queryset.prefetch_related('employee')
         obj = queryset[0]
         # May raise a permission denied
         self.check_object_permissions(self.request, obj)

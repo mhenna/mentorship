@@ -54,6 +54,10 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = '__all__'
-        depth = 1
+        
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = '__all__'

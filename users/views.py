@@ -16,7 +16,7 @@ import json
 from .models import Employee
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer
+from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer, UserSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -37,25 +37,23 @@ class UserListCreateView(ListCreateAPIView):
 
 
 
-class AddSkill(UpdateAPIView):
-    queryset= Employee.objects.all() 
-    serializer_class = UserListSerializer
-    def put(self, data, format=None):
-        queryset = Employee.objects.get(id=self.request.data['id'])
-        queryset.skills.add(self.request.data['Skill'])
-        return Response(status=status.HTTP_200_OK)
-
-def create_user(request):
-        for answer in request.data['answers']:
-            question = Question.objects.filter(question_id=answer['questionId'])[0]
-            if (not question.user_info=="None") and (not question.user_info==""):
-                for answertemp in answer['answer']:
-                    request.data[question.user_info]=answertemp['text']
-        serializer = CreateUserSerializer(data = request.data)
-        serializer.is_valid(raise_exception = True)
-        serializer.save()
-        
-        return serializer
+class AddSkill(APIView):
+    # queryset= Employee.objects.all() 
+    # serializer_class = UserListSerializer
+    # def put(self, data, format=None):
+    #     queryset = Employee.objects.get(id=self.request.data['id'])
+    #     queryset.skills.add(self.request.data['Skill'])
+    #     return Response(status=status.HTTP_200_OK)
+    @api_view(['PUT'])
+    def create_user(request):
+            queryset= Employee.objects.get(id=request.data['id'])
+            print("dfvdfvsddxfvsd",queryset)
+            queryset.cycles.add(request.data['cycles'])
+            # queryset.save(update_fields=['cycles',])
+            # serializer = CreateUserSerializer(data = request.data)
+            # serializer.is_valid(raise_exception = True)
+            # serializer.save()
+            return Response(status=status.HTTP_200_OK)
 
 def add_user_cycle(serializer):
         cycle = Cycle.objects.latest('creation_date')
