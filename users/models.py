@@ -29,7 +29,7 @@ class Employee(models.Model):
     cycles = models.ManyToManyField(Cycle, related_name='employee',blank=True)
    
     def __str__(self):
-        return self.email+" -- "+str(self.user_id)
+        return self.email+" -- "+str(self.id)
 
 
    

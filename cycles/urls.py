@@ -9,5 +9,6 @@ urlpatterns = [
     path('skills', views.CycleListView.as_view()),
     path('delete', views.CycleEditView.DeleteCycle),
     path('edit', views.CycleEditView.EditCycle),
+    path('<pk>', views.CycleRetrieveView.as_view()),
 
 ]
