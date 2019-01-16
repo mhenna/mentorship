@@ -1,19 +1,9 @@
 from rest_framework import serializers
 from rest_framework_jwt import utils
+from django.db.utils import IntegrityError
 import re
 from .models import Employee
 from answers.serializers import  AnswerSerializer
-class CreateUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Employee
-        fields = '__all__'
-    def create(self, validated_data):
-        return Employee.objects.create(**validated_data)
-    def validate_user(self, value):
-        if not Employee.objects.get(name=value):
-            raise serializers.ValidationError('user doesnt exist ')
-        return value
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
     answers = AnswerSerializer(many=True, read_only=True)
@@ -38,7 +28,14 @@ class UserListSerializer(serializers.ModelSerializer):
                 if now > deadline.mentee_registration:
                     message = 'You\'ve reached the deadline for the registration.'
                     raise serializers.ValidationError(message)
-
+        
+        email = data.get('email')
+        cycles = data.get('cycles')
+        print("***", type(cycles), " ", cycles[0].name)
+        
+        if Employee.objects.filter(email=email).filter(cycles=cycles[0].id):
+            raise IntegrityError('Email %s already exists for cycle id %s' % (email, cycles[0].id))
+        
         return data
 
 
@@ -48,16 +45,12 @@ class UserListSerializer(serializers.ModelSerializer):
         if not regex.match(value):
             raise serializers.ValidationError(
                 'Must register using a dell domain.')
-        if Employee.objects.filter(email=value):
-            raise serializers.ValidationError('Email already registered.')
+        # if Employee.objects.filter(email=value):
+        #     raise serializers.ValidationError('Email already registered.')
         return value
-    class Meta:
-        model = Employee
-        fields = '__all__'
+    
+    # def verify_uniqueness(self, data):
         
-
-
-class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = '__all__'
