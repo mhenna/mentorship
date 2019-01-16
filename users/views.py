@@ -16,7 +16,7 @@ import json
 from .models import Employee
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import CreateUserSerializer,UserRetrieveSerializer,UserListSerializer, UserSerializer
+from .serializers import UserRetrieveSerializer,UserListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -25,83 +25,23 @@ from cycles.models import Cycle
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
-    # queryset = Company.objects.all()  # nopep8
     serializer_class = UserListSerializer
-    # parser_classes = (MultiPartParser,)
-
-
-
-# class SkillListCreateView(ListCreateAPIView):
-#     queryset = Skill.objects.all()
-#     serializer_class = SkillsListSerializer
-
-
 
 class AddSkill(APIView):
-    # queryset= Employee.objects.all() 
-    # serializer_class = UserListSerializer
-    # def put(self, data, format=None):
-    #     queryset = Employee.objects.get(id=self.request.data['id'])
-    #     queryset.skills.add(self.request.data['Skill'])
-    #     return Response(status=status.HTTP_200_OK)
     @api_view(['PUT'])
     def create_user(request):
             queryset= Employee.objects.get(id=request.data['id'])
             print("dfvdfvsddxfvsd",queryset)
             queryset.cycles.add(request.data['cycles'])
-            # queryset.save(update_fields=['cycles',])
-            # serializer = CreateUserSerializer(data = request.data)
-            # serializer.is_valid(raise_exception = True)
-            # serializer.save()
             return Response(status=status.HTTP_200_OK)
 
 def add_user_cycle(serializer):
         cycle = Cycle.objects.latest('creation_date')
         user = Employee.objects.get(email=serializer.data['email'])
         user.cycles.add(cycle.id)
-        
-
-
-
-def insert_answers(request,serializer):
-        parsed_answers = [] 
-        for question in request.data['answers']:
-            for answer in question['answer']:
-                if((not 'answer_id' in  answer)):       #if the answer doesn't exist in the   databse then it will create a new one using answerSerializer
-                    answer_json = {}
-                    answer_json['answer_from_user']=[serializer.data['id']]
-                    answer_json['answer_to_question'] =question['questionId']
-                    answer_json['text'] = answer['text']
-                    if(not answer_json in parsed_answers):
-                        parsed_answers.append(answer_json)
-                else :                                                                              # else  it will just adjust the manyTomany field     
-                    tempanswer = Answer.objects.filter(answer_id=answer['answer_id'])[0]
-                    tempanswer.answer_from_user.add(serializer.data['id'])                
-                    tempanswer.save()      
-        answer_serializer =  AnswerListSerializer(data=parsed_answers,many=True)
-        answer_serializer.is_valid(raise_exception = True)
-        answer_serializer.save()
 
         
 class UsersView(APIView):
-    
-    @api_view(['POST'])
-    def signup(request):
-        deadline = Deadline.objects.first()
-        now = timezone.now()   
-          
-        
-        
-        if (request.data['is_mentor']==True) and (now > deadline.mentor_registration):
-            return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
-        if now > deadline.mentee_registration:
-            return Response({"detail":"Deadline reached"}, status=status.HTTP_400_BAD_REQUEST)
-            
-        serializer = create_user(request)
-        user=add_user_cycle(serializer)
-        insert_answers(request,user)
-        return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
-
 
     @api_view(['POST'])    
     def matchUsers(request):
@@ -153,14 +93,6 @@ class UserRetrieveView(RetrieveAPIView):
         obj = queryset[0]
         # May raise a permission denied
         self.check_object_permissions(self.request, obj)
-        # print("hereee",obj.answers.all()[0].answer_to_question.question_id)
-        # answers = {}
-        # for answer in obj.answers.all():
-        #     answers[answer.answer_to_question.question_id] =[]
-        # for answer in obj.answers.all():
-        #     answers[answer.answer_to_question.question_id].append(answer)
-        # print(answers,'answerssss')
-        # obj.answers.set(answers)
         return obj
 
 

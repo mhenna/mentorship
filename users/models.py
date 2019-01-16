@@ -6,13 +6,8 @@ from cycles.models import Cycle, Skill
 # Create your models here.
 
 
-
-
-
-
-
 class Employee(models.Model):
-    email = models.CharField(max_length=300, unique=True)
+    email = models.CharField(max_length=300)
     first_name = models.CharField(max_length=30,null=True)
     last_name = models.CharField(max_length=30,null=True)    
     direct_manager = models.CharField(max_length=30,null=True)
@@ -30,6 +25,9 @@ class Employee(models.Model):
    
     def __str__(self):
         return self.email+" -- "+str(self.id)
+
+
+    
 
 
    

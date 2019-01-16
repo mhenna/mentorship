@@ -11,7 +11,6 @@ from rest_framework.decorators import api_view, permission_classes
 from django.template import Context, Template
 
 from .serializers import LoginSerializer, RegisterationSerializer
-from users.serializers import CreateUserSerializer
 from users.models import Employee
 from .permissions import IsAdmin
 

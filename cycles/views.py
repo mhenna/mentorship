@@ -15,7 +15,7 @@ from admins.permissions import IsAdmin
 class CycleListCreateView(ListCreateAPIView):
     queryset = Cycle.objects.all()
   
-    serializer_class = CycleListSerializer
+    serializer_class = CycleSerializer
     # permission_classes = (IsAdmin,)
 
 
@@ -44,6 +44,20 @@ class AddSkill(UpdateAPIView):
 class AddDeadline(ListCreateAPIView):
     queryset = Deadline.objects.all()
     serializer_class= DeadlineListSerializer
+
+class DeadlineView(APIView):
+
+    @api_view(['PUT'])
+    @permission_classes([IsAdmin])
+    def Edit(request):
+        query = Deadline.objects.get(id=request.data['id'])
+        print("*************8283792739******** ", query.id)
+        query.mentor_registration = request.data['mentor']
+        query.mentee_registration = request.data['mentee']
+        query.save(update_fields=['mentor_registration','mentee_registration'])
+        
+        serializer_class = DeadlineListSerializer
+        return Response(status=status.HTTP_200_OK)
 
 class CycleEditView(APIView):
 
