@@ -73,6 +73,9 @@ class AdminView(APIView):
         try:
             mentors = Employee.objects.filter(is_mentor=True)
             mentees = Employee.objects.filter(is_mentor=False)
+            emails = request.data.get('email')
+            email_list = emails.split(",")
+            print("###############################", email_list)
             list = []
             template = Template(
                 '<p>{{body}}</p>')
@@ -95,7 +98,7 @@ class AdminView(APIView):
             if (request.data.get('type')=='seperate'):
                 emailMessage = EmailMessage('Dell Mentorship Portal', body,
                                         'mentorship@dell.com',
-                                        [request.data.get('email')])
+                                        email_list)
                 print(request.data)
                 print(request.data.get('emailBody'))
             emailMessage.content_subtype = "html"
