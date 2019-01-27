@@ -14,7 +14,7 @@
 .coverage
 .vscode/*
 
-venv/
+mentorshipEnv/
 
 **/migrations/
 **/**/migrations
