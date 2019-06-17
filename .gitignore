@@ -15,6 +15,6 @@
 .vscode/*
 
 mentorshipEnv/
-
+venv/
 **/migrations/
 **/**/migrations
