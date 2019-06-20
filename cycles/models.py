@@ -20,9 +20,13 @@ class Cycle(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
 class Deadline(models.Model):
-    mentor_registration = models.DateTimeField(auto_now=False, auto_now_add=False)
-    mentee_registration = models.DateTimeField(auto_now=False, auto_now_add=False)
-# Create your models here.
+    mentor_DeadlineRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)
+    mentee_DeadlineRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)
+
+class Startdate(models.Model):
+    mentor_StartRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)
+    mentee_StartRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)    
+# # Create your models here.
 
 
 

@@ -19,13 +19,13 @@ class UserListSerializer(serializers.ModelSerializer):
         deadline = Deadline.objects.first()
         now = timezone.now()
         if data['is_mentor'] == True :
-            if now > deadline.mentor_registration:
+            if now > deadline.mentor_DeadlineRegistration:
             #    datetime.date(datetime.today()) > form.date_deadline:
                 message = 'You\'ve reached the deadline for the registration.'
                 raise serializers.ValidationError(message)
         else:
             if data['is_mentor'] == False :
-                if now > deadline.mentee_registration:
+                if now > deadline.mentee_DeadlineRegistration:
                     message = 'You\'ve reached the deadline for the registration.'
                     raise serializers.ValidationError(message)
         
