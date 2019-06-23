@@ -5,10 +5,10 @@ from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIV
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CycleListSerializer, CycleSerializer, DeadlineListSerializer, SkillsListSerializer
+from .serializers import CycleListSerializer, CycleSerializer, DeadlineListSerializer, SkillsListSerializer, StartDateListSerializer
 from rest_framework.decorators import api_view, permission_classes
-from .models import Cycle, Deadline, Skill
-
+from .models import Cycle, Deadline, Skill, Startdate
+from django.http  import JsonResponse
 from admins.permissions import IsAdmin
 
 
@@ -38,7 +38,12 @@ class AddSkill(UpdateAPIView):
     permission_classes = (IsAdmin,)
     def put(self, data, format=None):
         queryset = Cycle.objects.get(id=self.request.data['id'])
-        queryset.skills.add(self.request.data['skill'])
+        print("!!!!!", queryset)
+        try:
+            queryset.skills.add(self.request.data['skill'])
+        except Exception as e:
+            print(e)
+            return Response('skill already exists',status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_200_OK)
 
 class AddDeadline(ListCreateAPIView):
@@ -52,12 +57,31 @@ class DeadlineView(APIView):
     def Edit(request):
         query = Deadline.objects.get(id=request.data['id'])
         print("*************8283792739******** ", query.id)
-        query.mentor_registration = request.data['mentor']
-        query.mentee_registration = request.data['mentee']
-        query.save(update_fields=['mentor_registration','mentee_registration'])
+        query.mentor_DeadlineRegistration = request.data['mentor']
+        query.mentee_DeadlineRegistration = request.data['mentee']
+        query.save(update_fields=['mentor_DeadlineRegistration','mentee_DeadlineRegistration'])
         
         serializer_class = DeadlineListSerializer
         return Response(status=status.HTTP_200_OK)
+
+class AddStartDate(ListCreateAPIView):
+    queryset = Startdate.objects.all()
+    serializer_class = StartDateListSerializer
+############################################################### Review
+class StartDateView(APIView):
+
+    @api_view(['PUT'])
+    @permission_classes([IsAdmin])
+    def Edit(request):
+        query = Startdate.objects.get(id=request.data['id'])
+        print("*************8283792739******** ", query.id)
+        query.mentor_StartRegistration = request.data['mentor']
+        query.mentee_StartRegistration = request.data['mentee']
+        query.save(update_fields=['mentor_StartRegistration','mentee_StartRegistration'])
+        
+        serializer_class = StartDateListSerializer
+        return Response(status=status.HTTP_200_OK)
+##################################################################
 
 class CycleEditView(APIView):
 

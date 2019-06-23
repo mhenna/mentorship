@@ -16,6 +16,7 @@ class Employee(models.Model):
     years_in_role = models.CharField(max_length=20, null=True)    
     study_field = models.CharField(max_length=30,null=True)
     is_mentor = models.BooleanField(default=False)
+    coaching = models.BooleanField(default=False)
     work_location = models.CharField(max_length=30,null=True)
     position = models.CharField(max_length=30,null=True)
     departement = models.CharField(max_length=30,null=True)

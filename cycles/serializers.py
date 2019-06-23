@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import Cycle, Deadline, Skill
+from .models import Cycle, Deadline, Skill, Startdate
 
 
 
@@ -15,6 +15,12 @@ class CycleListSerializer(serializers.ModelSerializer):
 class DeadlineListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deadline
+        fields = '__all__'
+
+
+class StartDateListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Startdate
         fields = '__all__'
 
 
