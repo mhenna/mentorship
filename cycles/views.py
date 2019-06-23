@@ -8,7 +8,7 @@ from rest_framework import status
 from .serializers import CycleListSerializer, CycleSerializer, DeadlineListSerializer, SkillsListSerializer, StartDateListSerializer
 from rest_framework.decorators import api_view, permission_classes
 from .models import Cycle, Deadline, Skill, Startdate
-
+from django.http  import JsonResponse
 from admins.permissions import IsAdmin
 
 
@@ -38,7 +38,12 @@ class AddSkill(UpdateAPIView):
     permission_classes = (IsAdmin,)
     def put(self, data, format=None):
         queryset = Cycle.objects.get(id=self.request.data['id'])
-        queryset.skills.add(self.request.data['skill'])
+        print("!!!!!", queryset)
+        try:
+            queryset.skills.add(self.request.data['skill'])
+        except Exception as e:
+            print(e)
+            return Response('skill already exists',status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_200_OK)
 
 class AddDeadline(ListCreateAPIView):
