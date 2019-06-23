@@ -28,3 +28,12 @@ class AnswerEditView(APIView):
         queryset = queryset.filter(id=request.data['id'])
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @api_view(['PUT'])
+    def EditAnswers(request):
+        query = Answer.objects.get(id=request.data['id'])
+        query.text = request.data['text']        
+        query.save(update_fields=['text'])
+        
+        serializer_class = AnswerListSerializer
+        return Response(status=status.HTTP_200_OK)
