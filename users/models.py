@@ -29,8 +29,8 @@ class Employee(models.Model):
         return self.email+" -- "+str(self.id)
 
 
-    
-
+class BusinessUnits(models.Model):
+    business_unit = models.TextField(max_length=350)
 
    
     # matched = models.ForeignKey('self',related_name='matches',on_delete=models.CASCADE, null=True)
