@@ -32,13 +32,22 @@ class AddSkill(APIView):
     def create_user(request):
             queryset= Employee.objects.get(id=request.data['id'])
             print("dfvdfvsddxfvsd",queryset)
-            queryset.cycles.add(request.data['cycles'])
+            try:
+                queryset.cycles.add(request.data['cycles'])
+            except Exception as e:
+                print(e)
+                return Response({'message':'Something went wrong.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return Response(status=status.HTTP_200_OK)
 
 def add_user_cycle(serializer):
         cycle = Cycle.objects.latest('creation_date')
         user = Employee.objects.get(email=serializer.data['email'])
-        user.cycles.add(cycle.id)
+        try:
+            user.cycles.add(cycle.id)
+        except Exception as e:
+            print(e)
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
         
 class UsersView(APIView):
@@ -51,7 +60,11 @@ class UsersView(APIView):
         mentor = Employee.objects.filter(id=request.data['mentorId'])[0]
         mentee = Employee.objects.filter(id=request.data['menteeId'])[0]
         mentor.matched.add(request.data['menteeId'])
-        mentor.save()  
+        try:
+            mentor.save()
+        except Exception as e:
+            print(e)
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
     
     @api_view(['POST'])    
@@ -62,7 +75,11 @@ class UsersView(APIView):
         mentor = Employee.objects.filter(id=request.data['mentorId'])[0]
         mentee = Employee.objects.filter(id=request.data['menteeId'])[0]
         mentor.matched.remove(request.data['menteeId'])
-        mentor.save()  
+        try:
+            mentor.save()
+        except Exception as e:
+            print(e)
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
         return Response({"message":"user unmatched successfully"}, status=status.HTTP_200_OK)
     
 class UserRetrieveView(RetrieveAPIView):

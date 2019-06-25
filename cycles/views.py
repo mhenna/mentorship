@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .models import Cycle, Deadline, Skill, Startdate
 from django.http  import JsonResponse
 from admins.permissions import IsAdmin
+from django.db import IntegrityError
 
 
 class CycleListCreateView(ListCreateAPIView):
@@ -38,12 +39,13 @@ class AddSkill(UpdateAPIView):
     permission_classes = (IsAdmin,)
     def put(self, data, format=None):
         queryset = Cycle.objects.get(id=self.request.data['id'])
-        print("!!!!!", queryset)
         try:
             queryset.skills.add(self.request.data['skill'])
-        except Exception as e:
+        except IntegrityError as e:
             print(e)
-            return Response('skill already exists',status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'message':'Skill already exists'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_200_OK)
 
 class AddDeadline(ListCreateAPIView):
@@ -59,15 +61,17 @@ class DeadlineView(APIView):
         print("*************8283792739******** ", query.id)
         query.mentor_DeadlineRegistration = request.data['mentor']
         query.mentee_DeadlineRegistration = request.data['mentee']
-        query.save(update_fields=['mentor_DeadlineRegistration','mentee_DeadlineRegistration'])
-        
+        try:
+            query.save(update_fields=['mentor_DeadlineRegistration','mentee_DeadlineRegistration'])
+        except Exception as e:
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer_class = DeadlineListSerializer
         return Response(status=status.HTTP_200_OK)
 
 class AddStartDate(ListCreateAPIView):
     queryset = Startdate.objects.all()
     serializer_class = StartDateListSerializer
-############################################################### Review
+
 class StartDateView(APIView):
 
     @api_view(['PUT'])
@@ -77,11 +81,12 @@ class StartDateView(APIView):
         print("*************8283792739******** ", query.id)
         query.mentor_StartRegistration = request.data['mentor']
         query.mentee_StartRegistration = request.data['mentee']
-        query.save(update_fields=['mentor_StartRegistration','mentee_StartRegistration'])
-        
+        try:
+            query.save(update_fields=['mentor_StartRegistration','mentee_StartRegistration'])
+        except Exception as e:
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer_class = StartDateListSerializer
         return Response(status=status.HTTP_200_OK)
-##################################################################
 
 class CycleEditView(APIView):
 
@@ -90,7 +95,10 @@ class CycleEditView(APIView):
     def DeleteCycle(request):
         queryset = Cycle.objects.all()
         queryset = queryset.filter(id=request.data['id'])
-        queryset.delete()
+        try:
+            queryset.delete()
+        except Exception as e:
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @api_view(['PUT'])
@@ -100,7 +108,10 @@ class CycleEditView(APIView):
         query.start_date = request.data['start_date']
         query.end_date = request.data['end_date']
         query.name = request.data['name']
-        query.save(update_fields=['start_date','end_date','name'])
+        try:
+            query.save(update_fields=['start_date','end_date','name'])
+        except Exception as e:
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         serializer_class = CycleListSerializer
         return Response(status=status.HTTP_200_OK)
