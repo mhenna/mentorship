@@ -26,7 +26,10 @@ class AnswerEditView(APIView):
     def DeleteAnswer(request):
         queryset = Answer.objects.all()
         queryset = queryset.filter(id=request.data['id'])
-        queryset.delete()
+        try:
+            queryset.delete()
+        except Exception as e:
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     @api_view(['PUT'])
