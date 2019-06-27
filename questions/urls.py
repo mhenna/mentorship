@@ -8,7 +8,7 @@ urlpatterns = [
     path('', views.QuestionsListCreate.as_view()),   
     path('delete', views.Edit.Delete),
     path('edit', views.Edit.EditQuestion), 
-     path('<type>', views.QuestionsList.as_view()), 
+    path('<type>', views.QuestionsList.as_view()), 
     # path('questions', views.QuestionsView.createQuestions,name='questions'),
     # path('insert-questions', views.insertQuestions, name='insert-questions'),
  
