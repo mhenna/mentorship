@@ -52,6 +52,60 @@ def add_user_cycle(serializer):
         
 class UsersView(APIView):
 
+    @api_view(['POST'])
+    def score(request):
+        """
+        Retrieve questions with 'question_type=MULTI_SELECT' and store their ids
+        Loop over the ids and retrieve all answers with 'answer_to_question_id'=id
+        If 'answer_from_user_id' != null and this id's 'is_mentor'=false, store 'text' and label the arrray a, b, c, 
+        according to the number of options they pick
+        Loop over all mentors and check the answers to the questions to calculate the score
+
+        """
+        max_options_size = 3
+        extra_char_score = 20
+        empty_slot_score = 10
+        min_score = 100000000
+        mentee_answer_one = ['Finance', 'Operations', 'IT']
+        labels = ['A', 'B', 'C']
+
+        answers = dict(zip(labels, mentee_answer_one))
+        actual_opttion = 'ABC'
+        possible_options = ['A', 'B', 'C', 'AB', 'AC', 'BA', 'BC', 'CA', 'CB', 'ABC', 'ACB', 'BAC', 'BCA', 'CAB', 'CBA']
+        scores = {}
+        for i in range(len(possible_options)):
+            score = 0
+            size = len(possible_options[i])
+            
+            for k in possible_options[i]:
+                if k not in actual_opttion:
+                    score = score + extra_char_score
+            
+            if size < max_options_size:
+                score = score + ((max_options_size - size) * empty_slot_score)
+
+            index = 0
+            for j in possible_options[i]:
+                if j is 'A' and j in actual_opttion:
+                    score = score + (index + 1)
+                elif j is 'B' and j in actual_opttion:
+                    score = score + (index + 4)
+                elif j is 'C' and j in actual_opttion:
+                    score = score + (index + 7)
+
+                index = index + 1
+            
+            if score < min_score:
+                min_score = score
+            scores[i]=score
+
+        optimal_matches = []
+        for key,val in scores.items():
+            if val == min_score:
+                optimal_matches.append(possible_options[key])
+        optimal_matches.sort(key=len)
+        return Response({"message":optimal_matches}, status=status.HTTP_200_OK)
+
     @api_view(['POST'])    
     def matchUsers(request):
         print(request.data)
