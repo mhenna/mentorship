@@ -31,3 +31,12 @@ class AnswerEditView(APIView):
         except Exception as e:
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @api_view(['PUT'])
+    def EditAnswers(request):
+        query = Answer.objects.get(id=request.data['id'])
+        query.text = request.data['text']        
+        query.save(update_fields=['text'])
+        
+        serializer_class = AnswerListSerializer
+        return Response(status=status.HTTP_200_OK)

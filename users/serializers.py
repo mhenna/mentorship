@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_jwt import utils
 from django.db.utils import IntegrityError
 import re
-from .models import Employee
+from .models import Employee, BusinessUnits
 from answers.serializers import  AnswerSerializer
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
@@ -53,4 +53,9 @@ class UserListSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Employee
+        fields = '__all__'
+
+class BusinessUnitsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BusinessUnits
         fields = '__all__'

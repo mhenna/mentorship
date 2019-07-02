@@ -13,10 +13,10 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from django.http import HttpResponse
 import json
-from .models import Employee
+from .models import Employee, BusinessUnits
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import UserRetrieveSerializer,UserListSerializer
+from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -82,6 +82,27 @@ class UsersView(APIView):
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
         return Response({"message":"user unmatched successfully"}, status=status.HTTP_200_OK)
     
+    @api_view(['POST'])
+    def bulk_insert_business_units(request):
+        data = open('BUList.txt', 'r')
+        separated_data = data.read().split('\n')
+        db_entries = [
+            BusinessUnits(
+                business_unit=i
+            )
+            for i in separated_data
+        ]
+        BusinessUnits.objects.bulk_create(db_entries)
+        return Response({"message":"hi"}, status=status.HTTP_200_OK)
+
+class BusinessUnitsRetrieve(APIView):
+    def get(self, request, format=None):
+        """
+        Return a list of all business units.
+        """
+        business_units = [bu.business_unit for bu in BusinessUnits.objects.all()]
+        return Response(business_units)
+
 class UserRetrieveView(RetrieveAPIView):
     queryset = Employee.objects.all()     
     serializer_class = UserRetrieveSerializer

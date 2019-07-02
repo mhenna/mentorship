@@ -18,3 +18,4 @@ mentorshipEnv/
 venv/
 **/migrations/
 **/**/migrations
+BUList.txt

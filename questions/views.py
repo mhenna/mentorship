@@ -90,3 +90,17 @@ class Edit(APIView):
         except Exception as e:
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @api_view(['PUT'])
+    def EditQuestion(request):
+        query = Question.objects.get(id=request.data['id'])
+        query.is_mentor = request.data['is_mentor']
+        # query.answers = request.data['answers']
+        query.is_matching = request.data['is_matching']
+        # query.mapped = request.data['mapped']
+        query.question_text = request.data['question_text']
+        query.question_type = request.data['question_type']
+        query.save(update_fields=['question_text','question_type','is_matching', 'is_mentor', 'mapped'])
+        
+        serializer_class = QuestionListSerializer
+        return Response(status=status.HTTP_200_OK)
