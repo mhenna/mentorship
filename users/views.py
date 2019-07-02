@@ -9,6 +9,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from django.forms.models import model_to_dict
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from django.http import HttpResponse
@@ -16,7 +17,7 @@ import json
 from .models import Employee, BusinessUnits
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer
+from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer, UserAnswerSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -25,7 +26,7 @@ from cycles.models import Cycle
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
-    serializer_class = UserListSerializer
+    serializer_class = UserAnswerSerializer
 
 class AddSkill(APIView):
     @api_view(['PUT'])
@@ -62,6 +63,22 @@ class UsersView(APIView):
         Loop over all mentors and check the answers to the questions to calculate the score
 
         """
+        query = Answer.objects.raw('SELECT answers_answer.*, users_employee.is_mentor, questions_question FROM answers_answer, questions_question, users_employee WHERE answers_answer.answer_from_user_id=users_employee.id AND questions_question.id = answers_answer.answer_to_question_id')
+        mentor_answers = []
+
+        for i in query:
+            if i.answer_to_question.question_type == 'MULTI_SELECT':
+                temp_obj = {'is_mentor':i.answer_from_user.is_mentor,
+                'text': i.text,
+                'user_id':i.answer_from_user.id,
+                'answer_id':i.id}
+                mentor_answers.append(temp_obj)
+        
+        print(mentor_answers)
+
+        ###########################################################################################
+        ###########################################################################################
+
         max_options_size = 3
         extra_char_score = 20
         empty_slot_score = 10
