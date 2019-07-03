@@ -17,16 +17,17 @@ import json
 from .models import Employee, BusinessUnits
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer, UserAnswerSerializer
+from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
 from django.utils import timezone
 from cycles.models import Cycle
+import string
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
-    serializer_class = UserAnswerSerializer
+    serializer_class = UserRetrieveSerializer
 
 class AddSkill(APIView):
     @api_view(['PUT'])
@@ -65,63 +66,131 @@ class UsersView(APIView):
         """
         query = Answer.objects.raw('SELECT answers_answer.*, users_employee.is_mentor, questions_question FROM answers_answer, questions_question, users_employee WHERE answers_answer.answer_from_user_id=users_employee.id AND questions_question.id = answers_answer.answer_to_question_id')
         mentor_answers = []
-
+        mentee_answers = []
         for i in query:
             if i.answer_to_question.question_type == 'MULTI_SELECT':
                 temp_obj = {'is_mentor':i.answer_from_user.is_mentor,
                 'text': i.text,
-                'user_id':i.answer_from_user.id,
-                'answer_id':i.id}
-                mentor_answers.append(temp_obj)
+                'user_id': i.answer_from_user.id,
+                'user_email': i.answer_from_user.email,
+                'answer_id': i.id,
+                'question_id': i.answer_to_question.id,
+                'mapped_question': i.answer_to_question.mapped_id,
+                'business_unit': i.answer_from_user.departement}
+            
+                if i.answer_from_user.is_mentor:
+                    mentor_answers.append(temp_obj)
+                else:
+                    mentee_answers.append(temp_obj) 
         
-        print(mentor_answers)
 
-        ###########################################################################################
-        ###########################################################################################
-
-        max_options_size = 3
-        extra_char_score = 20
-        empty_slot_score = 10
-        min_score = 100000000
-        mentee_answer_one = ['Finance', 'Operations', 'IT']
-        labels = ['A', 'B', 'C']
-
-        answers = dict(zip(labels, mentee_answer_one))
-        actual_opttion = 'ABC'
-        possible_options = ['A', 'B', 'C', 'AB', 'AC', 'BA', 'BC', 'CA', 'CB', 'ABC', 'ACB', 'BAC', 'BCA', 'CAB', 'CBA']
         scores = {}
-        for i in range(len(possible_options)):
-            score = 0
-            size = len(possible_options[i])
-            
-            for k in possible_options[i]:
-                if k not in actual_opttion:
-                    score = score + extra_char_score
-            
-            if size < max_options_size:
-                score = score + ((max_options_size - size) * empty_slot_score)
+        max_options_size = 3
+        extra_char_score = 40
+        empty_slot_score = 30
+        for i in range(len(mentee_answers)):
+            tmp_answers = []
+            result = []
+            tmp_answers_mentor  = []
+            res_mentor = []
+            actual_answer = ''
+            actual_answer_mentor = ''
+            this_question_id = mentee_answers[i].get('question_id')
+            this_mentee_id = mentee_answers[i].get('user_id')
+            tmp_answers = mentee_answers[i].get('text')
+            result = list(string.ascii_lowercase[0:len(tmp_answers)])
+            actual_answer = ''.join(result)
+            for j in range(len(mentor_answers)):
+                score = 0
+                this_mentor_id = mentor_answers[j].get('user_id')
+                if mentor_answers[j].get('mapped_question') == this_question_id:
+                    tmp_answers_mentor = mentor_answers[j].get('text')
+                    res_mentor = []
 
-            index = 0
-            for j in possible_options[i]:
-                if j is 'A' and j in actual_opttion:
-                    score = score + (index + 1)
-                elif j is 'B' and j in actual_opttion:
-                    score = score + (index + 4)
-                elif j is 'C' and j in actual_opttion:
-                    score = score + (index + 7)
+                    tmp_index = 0
+                    for k in tmp_answers_mentor:
+                        if k in tmp_answers:
+                            res_mentor.append(result[tmp_answers.index(k)])
+                        else:
+                            res_mentor.append('X')
 
-                index = index + 1
+                    actual_answer_mentor = ''.join(res_mentor)
             
-            if score < min_score:
-                min_score = score
-            scores[i]=score
+                    for q in actual_answer_mentor:
+                        if q not in actual_answer:
+                            score = score + extra_char_score
+                
+                    if len(actual_answer_mentor) < max_options_size:
+                        score = score + ((max_options_size - len(actual_answer_mentor)) * empty_slot_score)
+                
+                    ind = 0
 
-        optimal_matches = []
-        for key,val in scores.items():
-            if val == min_score:
-                optimal_matches.append(possible_options[key])
-        optimal_matches.sort(key=len)
-        return Response({"message":optimal_matches}, status=status.HTTP_200_OK)
+                    for p in actual_answer_mentor:
+                        if p is 'a' and p in actual_answer:
+                            score = score + (ind + 1)
+                        elif p is 'b' and p in actual_answer:
+                            score = score + (ind + 4)
+                        elif p is 'c' and p in actual_answer:
+                            score = score + (ind + 7)
+                        ind = ind + 1
+                                    
+                    if this_mentee_id not in scores:
+                        scores[this_mentee_id] = {this_mentor_id : {'score' : score}}
+                    elif this_mentor_id not in scores[this_mentee_id].keys():
+                        scores[this_mentee_id].update({this_mentor_id : {'score': score}})
+                    else:
+                        scores[this_mentee_id][this_mentor_id]['score'] = scores[this_mentee_id][this_mentor_id]['score'] + score 
+                                
+
+        print(json.dumps(scores, sort_keys=True, indent=4))
+                
+        
+        ###########################################################################################
+        ###########################################################################################
+
+        # max_options_size = 3
+        # extra_char_score = 20
+        # empty_slot_score = 10
+        # min_score = 100000000
+        # mentee_answer_one = ['Finance', 'Operations', 'IT']
+        # labels = ['A', 'B', 'C']
+
+        # answers = dict(zip(labels, mentee_answer_one))
+        # actual_opttion = 'ABC'
+        # possible_options = ['A', 'B', 'C', 'AB', 'AC', 'BA', 'BC', 'CA', 'CB', 'ABC', 'ACB', 'BAC', 'BCA', 'CAB', 'CBA']
+        # scores = {}
+        # for i in range(len(possible_options)):
+        #     score = 0
+        #     size = len(possible_options[i])
+            
+        #     for k in possible_options[i]:
+        #         if k not in actual_opttion:
+        #             score = score + extra_char_score
+            
+        #     if size < max_options_size:
+        #         score = score + ((max_options_size - size) * empty_slot_score)
+
+        #     index = 0
+        #     for j in possible_options[i]:
+        #         if j is 'A' and j in actual_opttion:
+        #             score = score + (index + 1)
+        #         elif j is 'B' and j in actual_opttion:
+        #             score = score + (index + 4)
+        #         elif j is 'C' and j in actual_opttion:
+        #             score = score + (index + 7)
+
+        #         index = index + 1
+            
+        #     if score < min_score:
+        #         min_score = score
+        #     scores[i]=score
+
+        # optimal_matches = []
+        # for key,val in scores.items():
+        #     if val == min_score:
+        #         optimal_matches.append(possible_options[key])
+        # optimal_matches.sort(key=len)
+        return Response({"message":scores}, status=status.HTTP_200_OK)
 
     @api_view(['POST'])    
     def matchUsers(request):

@@ -11,12 +11,6 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
         model = Employee
         fields = '__all__'
 
-class UserAnswerSerializer(serializers.ModelSerializer):
-    # answers = /AnswerSerializer(many=True, read_only=True)
-    class Meta:
-        model = Employee
-        fields = ('id', 'is_mentor')
-
 class UserListSerializer(serializers.ModelSerializer):
     def validate(self, data):
         from django.utils import timezone

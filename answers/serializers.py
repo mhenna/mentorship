@@ -11,4 +11,3 @@ class AnswerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = '__all__'
-        depth = 1
