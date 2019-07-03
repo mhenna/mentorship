@@ -54,8 +54,7 @@ def add_user_cycle(serializer):
         
 class UsersView(APIView):
 
-    @api_view(['POST'])
-    def score(request):
+    def score():
         """
         Retrieve questions with 'question_type=MULTI_SELECT' and store their ids
         Loop over the ids and retrieve all answers with 'answer_to_question_id'=id
@@ -67,8 +66,9 @@ class UsersView(APIView):
         query = Answer.objects.raw('SELECT answers_answer.*, users_employee.is_mentor, questions_question FROM answers_answer, questions_question, users_employee WHERE answers_answer.answer_from_user_id=users_employee.id AND questions_question.id = answers_answer.answer_to_question_id')
         mentor_answers = []
         mentee_answers = []
+        mentor_answers_mcq = []
+        mentee_answers_mcq = []
         for i in query:
-            if i.answer_to_question.question_type == 'MULTI_SELECT':
                 temp_obj = {'is_mentor':i.answer_from_user.is_mentor,
                 'text': i.text,
                 'user_id': i.answer_from_user.id,
@@ -79,9 +79,15 @@ class UsersView(APIView):
                 'business_unit': i.answer_from_user.departement}
             
                 if i.answer_from_user.is_mentor:
-                    mentor_answers.append(temp_obj)
+                    if i.answer_to_question.question_type == 'MULTI_SELECT':
+                        mentor_answers.append(temp_obj)
+                    else:
+                        mentor_answers_mcq.append(temp_obj) 
                 else:
-                    mentee_answers.append(temp_obj) 
+                    if i.answer_to_question.question_type == 'MULTI_SELECT':
+                        mentee_answers.append(temp_obj)
+                    else:
+                        mentee_answers_mcq.append(temp_obj) 
         
 
         scores = {}
@@ -190,6 +196,12 @@ class UsersView(APIView):
         #     if val == min_score:
         #         optimal_matches.append(possible_options[key])
         # optimal_matches.sort(key=len)
+        return scores, mentor_answers, mentor_answers_mcq, mentee_answers_mcq
+
+    @api_view(['POST'])
+    def elimination(request):
+        scores, mentor_answers, mentor_answers_mcq, mentee_answers_mcq = UsersView.score()
+
         return Response({"message":scores}, status=status.HTTP_200_OK)
 
     @api_view(['POST'])    
