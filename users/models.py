@@ -23,7 +23,7 @@ class Employee(models.Model):
     matched = models.ManyToManyField("self",related_name='matches',blank=True)    
     skills = models.ManyToManyField(Skill, related_name='employees',blank=True)
     cycles = models.ManyToManyField(Cycle, related_name='employee',blank=True)
-    hours =  models.IntegerField(null=True)
+    capacity =  models.IntegerField(null=True)
    
     def __str__(self):
         return self.email+" -- "+str(self.id)
