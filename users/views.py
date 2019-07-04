@@ -55,6 +55,8 @@ def add_user_cycle(serializer):
 class UsersView(APIView):
 
     def score():
+        from answers.views import AnswersListCreateUsers
+        from answers.serializers import AnswerUserSerializer
         """
         Retrieve questions with 'question_type=MULTI_SELECT' and store their ids
         Loop over the ids and retrieve all answers with 'answer_to_question_id'=id
@@ -63,54 +65,59 @@ class UsersView(APIView):
         Loop over all mentors and check the answers to the questions to calculate the score
 
         """
-        query = Answer.objects.raw('SELECT answers_answer.*, users_employee.is_mentor, questions_question FROM answers_answer, questions_question, users_employee WHERE answers_answer.answer_from_user_id=users_employee.id AND questions_question.id = answers_answer.answer_to_question_id')
-        mentor_answers = []
-        mentee_answers = []
-        mentor_answers_mcq = []
-        mentee_answers_mcq = []
-        for i in query:
-                temp_obj = {'is_mentor':i.answer_from_user.is_mentor,
-                'text': i.text,
-                'user_id': i.answer_from_user.id,
-                'user_email': i.answer_from_user.email,
-                'answer_id': i.id,
-                'question_id': i.answer_to_question.id,
-                'mapped_question': i.answer_to_question.mapped_id,
-                'business_unit': i.answer_from_user.departement}
+        # query = Answer.objects.raw('SELECT answers_answer.*, users_employee.is_mentor, questions_question FROM answers_answer, questions_question, users_employee WHERE answers_answer.answer_from_user_id=users_employee.id AND questions_question.id = answers_answer.answer_to_question_id')
+        queryset = Answer.objects.exclude(answer_from_user__isnull=True)
+        serializer_class = AnswerUserSerializer
+        mentor_answers = queryset.filter(answer_from_user__is_mentor=True, answer_to_question__question_type='MULTI_SELECT')
+        mentee_answers = queryset.filter(answer_from_user__is_mentor=False, answer_to_question__question_type='MULTI_SELECT')
+        mentor_answers_mcq = queryset.filter(answer_from_user__is_mentor=True, answer_to_question__question_type='MCQ')
+        mentee_answers_mcq = queryset.filter(answer_from_user__is_mentor=False, answer_to_question__question_type='MCQ')
+
+        for k in mentee_answers:
+            print (k.answer_from_user.id)
+        # for i in query:
+        #         temp_obj = {'is_mentor':i.answer_from_user.is_mentor,
+        #         'text': i.text,
+        #         'user_id': i.answer_from_user.id,
+        #         'user_email': i.answer_from_user.email,
+        #         'answer_id': i.id,
+        #         'question_id': i.answer_to_question.id,
+        #         'mapped_question': i.answer_to_question.mapped_id,
+        #         'business_unit': i.answer_from_user.departement}
             
-                if i.answer_from_user.is_mentor:
-                    if i.answer_to_question.question_type == 'MULTI_SELECT':
-                        mentor_answers.append(temp_obj)
-                    else:
-                        mentor_answers_mcq.append(temp_obj) 
-                else:
-                    if i.answer_to_question.question_type == 'MULTI_SELECT':
-                        mentee_answers.append(temp_obj)
-                    else:
-                        mentee_answers_mcq.append(temp_obj) 
+        #         if i.answer_from_user.is_mentor:
+        #             if i.answer_to_question.question_type == 'MULTI_SELECT':
+        #                 mentor_answers.append(temp_obj)
+        #             else:
+        #                 mentor_answers_mcq.append(temp_obj) 
+        #         else:
+        #             if i.answer_to_question.question_type == 'MULTI_SELECT':
+        #                 mentee_answers.append(temp_obj)
+        #             else:
+        #                 mentee_answers_mcq.append(temp_obj) 
         
 
         scores = {}
         max_options_size = 3
         extra_char_score = 40
         empty_slot_score = 30
-        for i in range(len(mentee_answers)):
+        for i in mentee_answers:
             tmp_answers = []
             result = []
             tmp_answers_mentor  = []
             res_mentor = []
             actual_answer = ''
             actual_answer_mentor = ''
-            this_question_id = mentee_answers[i].get('question_id')
-            this_mentee_id = mentee_answers[i].get('user_id')
-            tmp_answers = mentee_answers[i].get('text')
+            this_question_id = i.answer_to_question.id
+            this_mentee_id = mentee_answers.values()[i].get('answer_from_user_id')
+            tmp_answers = mentee_answers.values()[i].get('text')
             result = list(string.ascii_lowercase[0:len(tmp_answers)])
             actual_answer = ''.join(result)
             for j in range(len(mentor_answers)):
                 score = 0
-                this_mentor_id = mentor_answers[j].get('user_id')
-                if mentor_answers[j].get('mapped_question') == this_question_id:
-                    tmp_answers_mentor = mentor_answers[j].get('text')
+                this_mentor_id = mentor_answers.values()[j].get('answer_from_user_id')
+                if mentor_answers.values()[j].get('mapped_question') == this_question_id:
+                    tmp_answers_mentor = mentor_answers.values()[j].get('text')
                     res_mentor = []
 
                     tmp_index = 0
@@ -150,59 +157,29 @@ class UsersView(APIView):
 
         print(json.dumps(scores, sort_keys=True, indent=4))
                 
-        
-        ###########################################################################################
-        ###########################################################################################
-
-        # max_options_size = 3
-        # extra_char_score = 20
-        # empty_slot_score = 10
-        # min_score = 100000000
-        # mentee_answer_one = ['Finance', 'Operations', 'IT']
-        # labels = ['A', 'B', 'C']
-
-        # answers = dict(zip(labels, mentee_answer_one))
-        # actual_opttion = 'ABC'
-        # possible_options = ['A', 'B', 'C', 'AB', 'AC', 'BA', 'BC', 'CA', 'CB', 'ABC', 'ACB', 'BAC', 'BCA', 'CAB', 'CBA']
-        # scores = {}
-        # for i in range(len(possible_options)):
-        #     score = 0
-        #     size = len(possible_options[i])
-            
-        #     for k in possible_options[i]:
-        #         if k not in actual_opttion:
-        #             score = score + extra_char_score
-            
-        #     if size < max_options_size:
-        #         score = score + ((max_options_size - size) * empty_slot_score)
-
-        #     index = 0
-        #     for j in possible_options[i]:
-        #         if j is 'A' and j in actual_opttion:
-        #             score = score + (index + 1)
-        #         elif j is 'B' and j in actual_opttion:
-        #             score = score + (index + 4)
-        #         elif j is 'C' and j in actual_opttion:
-        #             score = score + (index + 7)
-
-        #         index = index + 1
-            
-        #     if score < min_score:
-        #         min_score = score
-        #     scores[i]=score
-
-        # optimal_matches = []
-        # for key,val in scores.items():
-        #     if val == min_score:
-        #         optimal_matches.append(possible_options[key])
-        # optimal_matches.sort(key=len)
-        return scores, mentor_answers, mentor_answers_mcq, mentee_answers_mcq
+        return scores, mentor_answers_mcq, mentee_answers_mcq
 
     @api_view(['POST'])
     def elimination(request):
-        scores, mentor_answers, mentor_answers_mcq, mentee_answers_mcq = UsersView.score()
+        scores, mentor_answers_mcq, mentee_answers_mcq = UsersView.score()
+        sorted_scores = {}
+        for i in range(len(mentee_answers_mcq)):
+            mentee_answer = mentee_answers_mcq.values()[i].get('text')
+            mentee_business_unit = mentee_answers_mcq.values()[i].get('business_unit')
+            question_id = mentee_answers_mcq.values()[i].get('answer_to_question_id')
+            for j in range(len(mentor_answers_mcq)):
+                if question_id == 114:
+                    if 'Yes' in mentee_answer:
+                        if mentor_answers_mcq.values()[j].get('business_unit') == mentee_business_unit and mentor_answers_mcq.values()[j].get('answer_from_user_id') in scores[mentee_answers_mcq.values()[i].get('answer_from_user_id')]:
+                            del scores[mentee_answers_mcq.values()[i].get('answer_from_user_id')][mentor_answers_mcq.values()[j].get('answer_from_user_id')]
 
-        return Response({"message":scores}, status=status.HTTP_200_OK)
+                else:
+                    if mentor_answers_mcq.values()[j].get('text') != mentee_answers_mcq.values()[i].get('text') and mentor_answers_mcq.values()[j].get('answer_from_user_id') in scores[mentee_answers_mcq.values()[i].get('answer_from_user_id')]:
+                        scores[mentee_answers_mcq.values()[i].get('answer_from_user_id')][mentor_answers_mcq.values()[j].get('answer_from_user_id')]['score'] = scores[mentee_answers_mcq.values()[i].get('answer_from_user_id')][mentor_answers_mcq.values()[j].get('answer_from_user_id')]['score'] + 400
+
+            if mentee_answers_mcq.values()[i].get('answer_from_user_id') not in sorted_scores:
+                sorted_scores[mentee_answers_mcq.values()[i].get('answer_from_user_id')] = sorted(scores[mentee_answers_mcq.values()[i].get('answer_from_user_id')].items(), key = lambda x: (x[1]['score']))
+        return Response({"message":sorted_scores}, status=status.HTTP_200_OK)
 
     @api_view(['POST'])    
     def matchUsers(request):

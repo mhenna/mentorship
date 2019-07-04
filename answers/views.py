@@ -7,7 +7,7 @@ from .models import Answer
 from django.db.models import F
 from django.db.models import Prefetch
 from users.models import Employee
-from .serializers import AnswerListSerializer, AnswerSerializer
+from .serializers import AnswerListSerializer, AnswerSerializer, AnswerUserSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -18,15 +18,8 @@ from rest_framework import status
 #     return HttpResponse("Hello, world. You're at the answers index.")
 
 class AnswersListCreateUsers(ListCreateAPIView):
-    # queryset = Answer.objects.exclude(answer_from_user__isnull=True).prefetch_related('answer_from_user', to_attr='is_mentor')
-    def get_queryset():
-        queryset = Answer.objects.exclude(answer_from_user__isnull=True)
-        serializer_class = AnswerListSerializer
-        return queryset
-    
-    def get_answer():
-        query = Answer.objects.raw('SELECT * FROM answers_answer')
-        return query
+    queryset = Answer.objects.exclude(answer_from_user__isnull=True)
+    serializer_class = AnswerUserSerializer
 
 class AnswersListCreate(ListCreateAPIView):
     queryset = Answer.objects.all()
