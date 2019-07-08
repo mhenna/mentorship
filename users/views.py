@@ -25,6 +25,8 @@ from django.utils import timezone
 from cycles.models import Cycle
 import string
 import copy
+from answers.views import AnswersListCreateUsers
+from answers.serializers import AnswerUserSerializer
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
@@ -56,8 +58,6 @@ def add_user_cycle(serializer):
 class UsersView(APIView):
 
     def score():
-        from answers.views import AnswersListCreateUsers
-        from answers.serializers import AnswerUserSerializer
         """
         Retrieve questions with 'question_type=MULTI_SELECT' and store their ids
         Loop over the ids and retrieve all answers with 'answer_to_question_id'=id
@@ -65,8 +65,51 @@ class UsersView(APIView):
         according to the number of options they pick
         Loop over all mentors and check the answers to the questions to calculate the score
         """
+
         queryset = Answer.objects.exclude(answer_from_user__isnull=True)
         serializer_class = AnswerUserSerializer
+
+        mentor_answers, mentee_answers, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring, mentor_career_mentoring, mentee_career_mentoring_id, mentor_career_mentoring_id = UsersView.process_query(queryset)
+
+        scores = {}
+        max_options_size = 3
+        extra_char_score = 40
+        empty_slot_score = 30
+
+        for i in mentee_answers:
+            tmp_answers = []
+            result = []
+            tmp_answers_mentor  = []
+            res_mentor = []
+            actual_answer = ''
+            actual_answer_mentor = ''
+            this_question_id = i.answer_to_question.id
+            this_mentee_id = i.answer_from_user.id
+            tmp_answers = i.text
+
+            result, actual_answer = UsersView.label_mentee_answers(tmp_answers)
+            
+            for j in mentor_answers:
+                score = 0
+                this_mentor_id = j.answer_from_user.id
+                if j.answer_to_question.mapped.id == this_question_id:
+                    tmp_answers_mentor = j.text
+                    res_mentor = []
+
+                    actual_answer_mentor = UsersView.label_mentor_answers(tmp_answers_mentor, tmp_answers, res_mentor, result)
+            
+                    score = UsersView.calculate_extra_character_or_empty_character_score(actual_answer_mentor, 
+                    actual_answer, score, 
+                    max_options_size,
+                    empty_slot_score,
+                    extra_char_score)
+
+                    score = UsersView.calculate_mentor_answer_score(score, actual_answer_mentor, actual_answer)
+                    scores = UsersView.store_mentor_score(this_mentee_id, scores, this_mentor_id, j.answer_from_user.capacity, score)                
+      
+        return scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id
+
+    def process_query(queryset):
         mentor_answers = queryset.filter(answer_from_user__is_mentor=True, answer_to_question__question_type='MULTI_SELECT')
         mentee_answers = queryset.filter(answer_from_user__is_mentor=False, answer_to_question__question_type='MULTI_SELECT')
         mentor_answers_mcq = queryset.filter(answer_from_user__is_mentor=True, answer_to_question__question_type='MCQ')
@@ -79,66 +122,57 @@ class UsersView(APIView):
             mentee_career_mentoring_id.append(i.answer_from_user.id)
         for i in mentor_career_mentoring:
             mentor_career_mentoring_id.append(i.answer_from_user.id)
-        scores = {}
-        max_options_size = 3
-        extra_char_score = 40
-        empty_slot_score = 30
-        for i in mentee_answers:
-            tmp_answers = []
-            result = []
-            tmp_answers_mentor  = []
-            res_mentor = []
-            actual_answer = ''
-            actual_answer_mentor = ''
-            this_question_id = i.answer_to_question.id
-            this_mentee_id = i.answer_from_user.id
-            tmp_answers = i.text
-            result = list(string.ascii_lowercase[0:len(tmp_answers)])
-            actual_answer = ''.join(result)
-            for j in mentor_answers:
-                score = 0
-                this_mentor_id = j.answer_from_user.id
-                if j.answer_to_question.mapped.id == this_question_id:
-                    tmp_answers_mentor = j.text
-                    res_mentor = []
+        
+        return mentor_answers, mentee_answers, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring, mentor_career_mentoring, mentee_career_mentoring_id, mentor_career_mentoring_id 
 
-                    tmp_index = 0
-                    for k in tmp_answers_mentor:
-                        if k in tmp_answers:
-                            res_mentor.append(result[tmp_answers.index(k)])
-                        else:
-                            res_mentor.append('X')
+    def label_mentee_answers(tmp_answers):
+        result = list(string.ascii_lowercase[0:len(tmp_answers)])
+        actual_answer = ''.join(result)
 
-                    actual_answer_mentor = ''.join(res_mentor)
-            
-                    for q in actual_answer_mentor:
-                        if q not in actual_answer:
-                            score = score + extra_char_score
+        return result, actual_answer
+    
+    def store_mentor_score(this_mentee_id, scores, this_mentor_id, capacity, score):
+        if this_mentee_id not in scores:
+            scores[this_mentee_id] = {this_mentor_id : {'score' : score, 'capacity':capacity}}
+        elif this_mentor_id not in scores[this_mentee_id].keys():
+            scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity}})
+        else:
+            scores[this_mentee_id][this_mentor_id]['score'] = scores[this_mentee_id][this_mentor_id]['score'] + score
+
+        return scores
+
+    def calculate_mentor_answer_score(score, actual_answer_mentor, actual_answer):
+        ind = 0
+        for p in actual_answer_mentor:
+            if p is 'a' and p in actual_answer:
+                score = score + (ind + 1)
+            elif p is 'b' and p in actual_answer:
+                score = score + (ind + 4)
+            elif p is 'c' and p in actual_answer:
+                score = score + (ind + 7)
+            ind = ind + 1
+        
+        return score
+    
+    def calculate_extra_character_or_empty_character_score(actual_answer_mentor, actual_answer, score, max_options_size, empty_slot_score, extra_char_score):
+        for q in actual_answer_mentor:
+            if q not in actual_answer:
+                score = score + extra_char_score
                 
-                    if len(actual_answer_mentor) < max_options_size:
-                        score = score + ((max_options_size - len(actual_answer_mentor)) * empty_slot_score)
-                
-                    ind = 0
+        if len(actual_answer_mentor) < max_options_size:
+            score = score + ((max_options_size - len(actual_answer_mentor)) * empty_slot_score)
+        
+        return score
 
-                    for p in actual_answer_mentor:
-                        if p is 'a' and p in actual_answer:
-                            score = score + (ind + 1)
-                        elif p is 'b' and p in actual_answer:
-                            score = score + (ind + 4)
-                        elif p is 'c' and p in actual_answer:
-                            score = score + (ind + 7)
-                        ind = ind + 1
-                                    
-                    if this_mentee_id not in scores:
-                        scores[this_mentee_id] = {this_mentor_id : {'score' : score, 'capacity':j.answer_from_user.capacity}}
-                    elif this_mentor_id not in scores[this_mentee_id].keys():
-                        scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':j.answer_from_user.capacity}})
-                    else:
-                        scores[this_mentee_id][this_mentor_id]['score'] = scores[this_mentee_id][this_mentor_id]['score'] + score 
-                                
+    def label_mentor_answers(tmp_answers_mentor, tmp_answers, res_mentor, result):
+        for k in tmp_answers_mentor:
+            if k in tmp_answers:
+                res_mentor.append(result[tmp_answers.index(k)])
+            else:
+                res_mentor.append('X')
 
-                
-        return scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id
+        actual_answer_mentor = ''.join(res_mentor)
+        return actual_answer_mentor
 
     def career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id):
         refined_scores = copy.deepcopy(scores)
@@ -150,6 +184,17 @@ class UsersView(APIView):
                         del refined_scores[i][j]
 
         return refined_scores
+
+    def convert_scores_to_json(sorted_scores):
+        returned_scores = []
+        for i in sorted_scores.keys():
+            mentors = []
+            for j in range(len(sorted_scores[i])):
+                mentors.append({'id': sorted_scores[i][j][0], 'data': sorted_scores[i][j][1]})
+            
+            returned_scores.append({'mentee':{'id':i, 'mentors': mentors}})
+
+        return returned_scores
 
     @api_view(['GET'])
     def elimination(request):
@@ -168,21 +213,15 @@ class UsersView(APIView):
                 else:
                     if j.text != i.text and j.answer_from_user.id in scores[i.answer_from_user.id]:
                         scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 400
+
         scores = UsersView.career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id)
+        
         for i in scores.keys():
             sorted_scores[i] = sorted(scores[i].items(), key = lambda x: (x[1]['score']))
+
+        returned_scores = UsersView.convert_scores_to_json(sorted_scores)
         
-        # print(sorted_scores.keys())
-        # print(sorted_scores.values())
-        ret_scores = []
-        for i in sorted_scores.keys():
-            mentors = []
-            for j in range(len(sorted_scores[i])):
-                mentors.append({'id': sorted_scores[i][j][0], 'data': sorted_scores[i][j][1]})
-            
-            ret_scores.append({'mentee':{'id':i, 'mentors': mentors}})
-        
-        return Response(ret_scores, status=status.HTTP_200_OK)
+        return Response(returned_scores, status=status.HTTP_200_OK)
 
     @api_view(['POST'])    
     def matchUsers(request):
