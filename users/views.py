@@ -24,6 +24,7 @@ from cycles.models import Deadline
 from django.utils import timezone
 from cycles.models import Cycle
 import string
+import copy
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
@@ -63,15 +64,21 @@ class UsersView(APIView):
         If 'answer_from_user_id' != null and this id's 'is_mentor'=false, store 'text' and label the arrray a, b, c, 
         according to the number of options they pick
         Loop over all mentors and check the answers to the questions to calculate the score
-
         """
         queryset = Answer.objects.exclude(answer_from_user__isnull=True)
         serializer_class = AnswerUserSerializer
         mentor_answers = queryset.filter(answer_from_user__is_mentor=True, answer_to_question__question_type='MULTI_SELECT')
         mentee_answers = queryset.filter(answer_from_user__is_mentor=False, answer_to_question__question_type='MULTI_SELECT')
         mentor_answers_mcq = queryset.filter(answer_from_user__is_mentor=True, answer_to_question__question_type='MCQ')
-        mentee_answers_mcq = queryset.filter(answer_from_user__is_mentor=False, answer_to_question__question_type='MCQ') 
-
+        mentee_answers_mcq = queryset.filter(answer_from_user__is_mentor=False, answer_to_question__question_type='MCQ')
+        mentee_career_mentoring =  queryset.filter(answer_from_user__is_mentor=False, text='{"Career mentoring"}')
+        mentor_career_mentoring =  queryset.filter(answer_from_user__is_mentor=True, text__contains='{"Career mentoring"}')
+        mentee_career_mentoring_id=[]
+        mentor_career_mentoring_id=[]
+        for i in mentee_career_mentoring:
+            mentee_career_mentoring_id.append(i.answer_from_user.id)
+        for i in mentor_career_mentoring:
+            mentor_career_mentoring_id.append(i.answer_from_user.id)
         scores = {}
         max_options_size = 3
         extra_char_score = 40
@@ -123,20 +130,30 @@ class UsersView(APIView):
                         ind = ind + 1
                                     
                     if this_mentee_id not in scores:
-                        scores[this_mentee_id] = {this_mentor_id : {'score' : score}}
+                        scores[this_mentee_id] = {this_mentor_id : {'score' : score, 'capacity':j.answer_from_user.capacity}}
                     elif this_mentor_id not in scores[this_mentee_id].keys():
-                        scores[this_mentee_id].update({this_mentor_id : {'score': score}})
+                        scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':j.answer_from_user.capacity}})
                     else:
                         scores[this_mentee_id][this_mentor_id]['score'] = scores[this_mentee_id][this_mentor_id]['score'] + score 
                                 
 
-        print(json.dumps(scores, sort_keys=True, indent=4))
                 
-        return scores, mentor_answers_mcq, mentee_answers_mcq
+        return scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id
+
+    def career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id):
+        refined_scores = copy.deepcopy(scores)
+        for i in scores.keys():
+            mentee_id = i
+            if i in mentee_career_mentoring_id:
+                for j in scores[i].keys():
+                    if j not in mentor_career_mentoring_id:
+                        del refined_scores[i][j]
+
+        return refined_scores
 
     @api_view(['GET'])
     def elimination(request):
-        scores, mentor_answers_mcq, mentee_answers_mcq = UsersView.score()
+        scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id = UsersView.score()
         sorted_scores = {}
         for i in mentee_answers_mcq:
             mentee_answer = i.text
@@ -151,9 +168,9 @@ class UsersView(APIView):
                 else:
                     if j.text != i.text and j.answer_from_user.id in scores[i.answer_from_user.id]:
                         scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 400
-
-            if i.answer_from_user.id not in sorted_scores:
-                sorted_scores[i.answer_from_user.id] = sorted(scores[i.answer_from_user.id].items(), key = lambda x: (x[1]['score']))
+        scores = UsersView.career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id)
+        for i in scores.keys():
+            sorted_scores[i] = sorted(scores[i].items(), key = lambda x: (x[1]['score']))
         return Response({"message":sorted_scores}, status=status.HTTP_200_OK)
 
     @api_view(['POST'])    

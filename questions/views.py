@@ -10,6 +10,9 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from .models import Question
 from .serializers import CreateQuestionsSerializer,QuestionListSerializer
+from rest_framework import viewsets
+from django.db.models import Prefetch
+from answers.models import Answer
 # def index(request):
 #     response_data = {}
 #     response_data['result'] = 'error'
@@ -72,8 +75,18 @@ class QuestionsList(ListAPIView):
     serializer_class = QuestionListSerializer 
     def get_queryset(self):
         mentor = self.kwargs['type']
-        queryset = Question.objects.filter(is_mentor=mentor)
+        queryset = Question.objects.filter(is_mentor=mentor).prefetch_related(Prefetch(
+            'answers',
+            queryset=Answer.objects.filter(original=True)
+        ))
         return queryset
+
+class QuestionsListRetrieve(ListCreateAPIView):
+    queryset = Question.objects.prefetch_related(Prefetch(
+        'answers',
+        queryset=Answer.objects.filter(original=True)
+    ))
+    serializer_class = QuestionListSerializer 
 
 class QuestionsListCreate(ListCreateAPIView):
     queryset = Question.objects.all()
