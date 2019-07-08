@@ -171,7 +171,18 @@ class UsersView(APIView):
         scores = UsersView.career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id)
         for i in scores.keys():
             sorted_scores[i] = sorted(scores[i].items(), key = lambda x: (x[1]['score']))
-        return Response({"message":sorted_scores}, status=status.HTTP_200_OK)
+        
+        # print(sorted_scores.keys())
+        # print(sorted_scores.values())
+        ret_scores = []
+        for i in sorted_scores.keys():
+            mentors = []
+            for j in range(len(sorted_scores[i])):
+                mentors.append({'id': sorted_scores[i][j][0], 'data': sorted_scores[i][j][1]})
+            
+            ret_scores.append({'mentee':{'id':i, 'mentors': mentors}})
+        
+        return Response(ret_scores, status=status.HTTP_200_OK)
 
     @api_view(['POST'])    
     def matchUsers(request):
