@@ -4,7 +4,10 @@ from django.shortcuts import render
 from rest_framework.generics import ListCreateAPIView
 from django.http import HttpResponse
 from .models import Answer
-from .serializers import AnswerListSerializer
+from django.db.models import F
+from django.db.models import Prefetch
+from users.models import Employee
+from .serializers import AnswerListSerializer, AnswerSerializer, AnswerUserSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -14,10 +17,13 @@ from rest_framework import status
 # def index(request):
 #     return HttpResponse("Hello, world. You're at the answers index.")
 
+class AnswersListCreateUsers(ListCreateAPIView):
+    queryset = Answer.objects.exclude(answer_from_user__isnull=True)
+    serializer_class = AnswerUserSerializer
+
 class AnswersListCreate(ListCreateAPIView):
     queryset = Answer.objects.all()
-    serializer_class = AnswerListSerializer
-   
+    serializer_class = AnswerListSerializer 
 
 class AnswerEditView(APIView):
 
