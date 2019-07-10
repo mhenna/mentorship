@@ -77,12 +77,25 @@ class StartDateView(APIView):
     @api_view(['PUT'])
     @permission_classes([IsAdmin])
     def Edit(request):
-        query = Startdate.objects.get(id=request.data['id'])
-        print("*************8283792739******** ", query.id)
-        query.mentor_StartRegistration = request.data['mentor']
-        query.mentee_StartRegistration = request.data['mentee']
+        print(request.data['id'])
         try:
-            query.save(update_fields=['mentor_StartRegistration','mentee_StartRegistration'])
+            query = Startdate.objects.all()
+            queryset = query.filter(id=request.data['id'])
+
+            if not queryset:
+                query = Startdate(id=request.data['id'], mentor_StartRegistration = request.data['mentor'], mentee_StartRegistration = request.data['mentee'])
+                print('11')
+                query.save()
+            else:
+                query = Startdate.objects.get(id=request.data['id'])
+                query.mentor_StartRegistration = request.data['mentor']
+                query.mentee_StartRegistration = request.data['mentee']
+                query.save(update_fields=['mentor_StartRegistration','mentee_StartRegistration'])
+                print('12')
+                
+
+            print("This is query object", query)
+
         except Exception as e:
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer_class = StartDateListSerializer
