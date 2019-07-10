@@ -57,12 +57,20 @@ class DeadlineView(APIView):
     @api_view(['PUT'])
     @permission_classes([IsAdmin])
     def Edit(request):
-        query = Deadline.objects.get(id=request.data['id'])
-        print("*************8283792739******** ", query.id)
-        query.mentor_DeadlineRegistration = request.data['mentor']
-        query.mentee_DeadlineRegistration = request.data['mentee']
         try:
-            query.save(update_fields=['mentor_DeadlineRegistration','mentee_DeadlineRegistration'])
+            query = Deadline.objects.all()
+            queryset = query.filter(id=request.data['id'])
+
+            if not queryset:
+                query = Deadline(id=request.data['id'], mentor_DeadlineRegistration = request.data['mentor'], mentee_DeadlineRegistration = request.data['mentee'])
+                query.save()
+            else:
+                query = Deadline.objects.get(id=request.data['id'])
+                print("*************8283792739******** ", query.id)
+                query.mentor_DeadlineRegistration = request.data['mentor']
+                query.mentee_DeadlineRegistration = request.data['mentee']
+                query.save(update_fields=['mentor_DeadlineRegistration','mentee_DeadlineRegistration'])
+                
         except Exception as e:
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer_class = DeadlineListSerializer
