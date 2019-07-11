@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Employee
+from .models import Cycle
 
 # Register your models here.
-admin.site.register(Employee)
+admin.site.register(Cycle)

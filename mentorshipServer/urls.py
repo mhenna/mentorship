@@ -20,5 +20,8 @@ urlpatterns = [
     path('answers/', include('answers.urls')),    
     path('users/', include('users.urls')),    
     path('questions/', include('questions.urls')),
-    path('admin/', admin.site.urls),
+    path('admin/', include('admins.urls')),
+    # path('admin/', admin.site.urls),    
+    path('cycles/', include('cycles.urls'))
+ 
 ]

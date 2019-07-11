@@ -2,17 +2,39 @@ from django.db import models
 
 # Create your models here.
 import uuid
+from cycles.models import Cycle, Skill
 # Create your models here.
-class User(models.Model):
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)    
-    direct_manager = models.CharField(max_length=30)
-    years_of_experience = models.IntegerField()
-    years_within_organization = models.IntegerField()
-    years_in_role = models.IntegerField()    
-    study_field = models.CharField(max_length=30)
+
+
+class Employee(models.Model):
+    email = models.CharField(max_length=300)
+    first_name = models.CharField(max_length=30,null=True)
+    last_name = models.CharField(max_length=30,null=True)    
+    direct_manager = models.CharField(max_length=30,null=True)
+    years_of_experience = models.CharField(max_length=20, null=True)
+    years_within_organization = models.CharField(max_length=20, null=True)
+    years_in_role = models.CharField(max_length=20, null=True)    
+    study_field = models.CharField(max_length=30,null=True)
     is_mentor = models.BooleanField(default=False)
-    work_location = models.CharField(max_length=30)
-    position = models.CharField(max_length=30)
-    departement = models.CharField(max_length=30)
+    coaching = models.BooleanField(default=False)
+    work_location = models.CharField(max_length=30,null=True)
+    position = models.CharField(max_length=30,null=True)
+    departement = models.CharField(max_length=30,null=True)
+    matched = models.ManyToManyField("self",related_name='matches',blank=True)    
+    skills = models.ManyToManyField(Skill, related_name='employees',blank=True)
+    cycles = models.ManyToManyField(Cycle, related_name='employee',blank=True)
+    capacity =  models.IntegerField(null=True)
+   
+    def __str__(self):
+        return self.email+" -- "+str(self.id)
+
+
+class BusinessUnits(models.Model):
+    business_unit = models.TextField(max_length=350)
+
+   
+    # matched = models.ForeignKey('self',related_name='matches',on_delete=models.CASCADE, null=True)
+
+
+
+    
