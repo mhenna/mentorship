@@ -70,12 +70,13 @@ class UsersView(APIView):
         serializer_class = AnswerUserSerializer
 
         mentor_answers, mentee_answers, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring, mentor_career_mentoring, mentee_career_mentoring_id, mentor_career_mentoring_id = UsersView.process_query(queryset)
-
+        
         scores = {}
         max_options_size = 3
         extra_char_score = 40
         empty_slot_score = 30
 
+        mentee_skills = {}
         for i in mentee_answers:
             tmp_answers = []
             result = []
@@ -92,6 +93,12 @@ class UsersView(APIView):
             for j in mentor_answers:
                 score = 0
                 this_mentor_id = j.answer_from_user.id
+                mentor_skills = []
+
+                if this_question_id == 113:
+                    mentor_skills = j.text
+                    mentee_skills[i.answer_from_user.id] = i.text
+
                 if j.answer_to_question.mapped.id == this_question_id:
                     tmp_answers_mentor = j.text
                     res_mentor = []
@@ -105,9 +112,14 @@ class UsersView(APIView):
                     extra_char_score)
 
                     score = UsersView.calculate_mentor_answer_score(score, actual_answer_mentor, actual_answer)
-                    scores = UsersView.store_mentor_score(this_mentee_id, scores, this_mentor_id, j.answer_from_user.capacity, score, j.answer_from_user.email)                
+                    scores = UsersView.store_mentor_score(this_mentee_id, scores, this_mentor_id, 
+                    j.answer_from_user.capacity, score, j.answer_from_user.email, 
+                    j.answer_from_user.first_name + ' ' + j.answer_from_user.last_name, 
+                    j.answer_from_user.years_of_experience, 
+                    j.answer_from_user.years_within_organization, 
+                    mentor_skills)                
       
-        return scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id
+        return scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id, mentee_skills
 
     def process_query(queryset):
         mentor_answers = queryset.filter(answer_from_user__is_mentor=True, answer_to_question__question_type='MULTI_SELECT')
@@ -131,13 +143,15 @@ class UsersView(APIView):
 
         return result, actual_answer
     
-    def store_mentor_score(this_mentee_id, scores, this_mentor_id, capacity, score, mentor_email):
+    def store_mentor_score(this_mentee_id, scores, this_mentor_id, capacity, score, mentor_email, mentor_name, mentor_years_of_experience, mentor_years_within_organization, mentor_skills):
         if this_mentee_id not in scores:
-            scores[this_mentee_id] = {this_mentor_id : {'score' : score, 'capacity':capacity, 'email': mentor_email}}
+            scores[this_mentee_id] = {this_mentor_id : {'score' : score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}}
         elif this_mentor_id not in scores[this_mentee_id].keys():
-            scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity, 'email': mentor_email}})
+            scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}})
         else:
             scores[this_mentee_id][this_mentor_id]['score'] = scores[this_mentee_id][this_mentor_id]['score'] + score
+            if len(scores[this_mentee_id][this_mentor_id]['skills']) == 0:
+                scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}})
 
         return scores
 
@@ -185,27 +199,27 @@ class UsersView(APIView):
 
         return refined_scores
 
-    def convert_scores_to_json(sorted_scores, mentee_emails):
+    def convert_scores_to_json(sorted_scores, mentee_info):
         returned_scores = []
         for i in sorted_scores.keys():
             mentors = []
             for j in range(len(sorted_scores[i])):
                 mentors.append({'id': sorted_scores[i][j][0], 'data': sorted_scores[i][j][1]})
             
-            returned_scores.append({'mentee':{'id':i, 'email': mentee_emails[i], 'mentors': mentors}})
+            returned_scores.append({'mentee':{'id':i, 'info': mentee_info[i], 'mentors': mentors}})
 
         return returned_scores
 
     @api_view(['GET'])
     def elimination(request):
-        scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id = UsersView.score()
+        scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id, mentee_skills = UsersView.score()
         sorted_scores = {}
-        mentee_emails = {}
+        mentee_info = {}
         for i in mentee_answers_mcq:
             mentee_answer = i.text
             mentee_business_unit = i.answer_from_user.departement
             question_id = i.answer_to_question.id
-            mentee_emails[i.answer_from_user.id] = i.answer_from_user.email
+            mentee_info[i.answer_from_user.id] = {'email':i.answer_from_user.email, 'name': i.answer_from_user.first_name + ' ' + i.answer_from_user.last_name, 'years_of_experience': i.answer_from_user.years_of_experience, 'years_within_organization': i.answer_from_user.years_within_organization, 'skills_interested_in': mentee_skills[i.answer_from_user.id]}
             for j in mentor_answers_mcq:
                 if question_id == 114:
                     if 'Yes' in mentee_answer:
@@ -221,7 +235,7 @@ class UsersView(APIView):
         for i in scores.keys():
             sorted_scores[i] = sorted(scores[i].items(), key = lambda x: (x[1]['score']))
 
-        returned_scores = UsersView.convert_scores_to_json(sorted_scores, mentee_emails)
+        returned_scores = UsersView.convert_scores_to_json(sorted_scores, mentee_info)
         
         return Response(returned_scores, status=status.HTTP_200_OK)
 
