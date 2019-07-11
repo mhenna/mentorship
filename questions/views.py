@@ -10,6 +10,9 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from .models import Question
 from .serializers import CreateQuestionsSerializer,QuestionListSerializer
+from rest_framework import viewsets
+from django.db.models import Prefetch
+from answers.models import Answer
 # def index(request):
 #     response_data = {}
 #     response_data['result'] = 'error'
@@ -72,8 +75,18 @@ class QuestionsList(ListAPIView):
     serializer_class = QuestionListSerializer 
     def get_queryset(self):
         mentor = self.kwargs['type']
-        queryset = Question.objects.filter(is_mentor=mentor)
+        queryset = Question.objects.filter(is_mentor=mentor).prefetch_related(Prefetch(
+            'answers',
+            queryset=Answer.objects.filter(original=True)
+        ))
         return queryset
+
+class QuestionsListRetrieve(ListCreateAPIView):
+    queryset = Question.objects.prefetch_related(Prefetch(
+        'answers',
+        queryset=Answer.objects.filter(original=True)
+    ))
+    serializer_class = QuestionListSerializer 
 
 class QuestionsListCreate(ListCreateAPIView):
     queryset = Question.objects.all()
@@ -100,7 +113,24 @@ class Edit(APIView):
         # query.mapped = request.data['mapped']
         query.question_text = request.data['question_text']
         query.question_type = request.data['question_type']
+        
         query.save(update_fields=['question_text','question_type','is_matching', 'is_mentor', 'mapped'])
+        
+        serializer_class = QuestionListSerializer
+        return Response(status=status.HTTP_200_OK)
+    
+    @api_view(['PUT'])
+    def EditQuestionMapping(request):
+        query = Question.objects.get(id=request.data['id'])
+        tmp = Question.objects.get(id=request.data['mapped'])
+        # query.is_mentor = request.data['is_mentor']
+        # query.answers = request.data['answers']
+        # query.is_matching = request.data['is_matching']
+        # query.mapped = request.data['mapped']
+        # query.question_text = request.data['question_text']
+        # query.question_type = request.data['question_type']
+        query.mapped = tmp
+        query.save(update_fields=['mapped'])
         
         serializer_class = QuestionListSerializer
         return Response(status=status.HTTP_200_OK)

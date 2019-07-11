@@ -23,3 +23,8 @@ class QuestionListSerializer(serializers.ModelSerializer):
         model =Question
         fields = '__all__'
 
+class QuestionAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('id', 'question_type')
+
