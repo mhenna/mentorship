@@ -232,6 +232,10 @@ class UsersView(APIView):
         print('mentor',request.data['mentorId'])
         mentor = Employee.objects.filter(id=request.data['mentorId'])[0]
         mentee = Employee.objects.filter(id=request.data['menteeId'])[0]
+
+        if(mentor.is_mentor == mentee.is_mentor):
+            return Response({'message':'You cannot match same type together'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         mentor.matched.add(request.data['menteeId'])
         try:
             mentor.save()
