@@ -22,10 +22,14 @@ class Cycle(models.Model):
 class Deadline(models.Model):
     mentor_DeadlineRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)
     mentee_DeadlineRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)
+    cycle = models.ForeignKey(Cycle, related_name='deadline_cycle',default=None, null=True, on_delete=models.CASCADE)
+
 
 class Startdate(models.Model):
     mentor_StartRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)
-    mentee_StartRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)    
+    mentee_StartRegistration = models.DateTimeField(auto_now=False, auto_now_add=False)
+    cycle = models.ForeignKey(Cycle, related_name='start_cycle',default=None, null=True, on_delete=models.CASCADE)
+    
 # # Create your models here.
 
 
