@@ -117,8 +117,8 @@ class UsersView(APIView):
                     j.answer_from_user.first_name + ' ' + j.answer_from_user.last_name, 
                     j.answer_from_user.years_of_experience, 
                     j.answer_from_user.years_within_organization, 
-                    mentor_skills)                
-      
+                    mentor_skills)           
+
         return scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id, mentee_skills
 
     def process_query(queryset):
@@ -149,9 +149,12 @@ class UsersView(APIView):
         elif this_mentor_id not in scores[this_mentee_id].keys():
             scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}})
         else:
-            scores[this_mentee_id][this_mentor_id]['score'] = scores[this_mentee_id][this_mentor_id]['score'] + score
+            # scores[this_mentee_id][this_mentor_id]['score']= scores[this_mentee_id][this_mentor_id]['score'] + score
             if len(scores[this_mentee_id][this_mentor_id]['skills']) == 0:
-                scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}})
+                scores[this_mentee_id].update({this_mentor_id : {'score': scores[this_mentee_id][this_mentor_id]['score'] + score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}})
+            else:
+                scores[this_mentee_id].update({this_mentor_id : {'score': scores[this_mentee_id][this_mentor_id]['score'] + score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': scores[this_mentee_id][this_mentor_id]['skills']}})
+
 
         return scores
 
@@ -226,9 +229,12 @@ class UsersView(APIView):
                         if j.answer_from_user.departement == mentee_business_unit and j.answer_from_user.id in scores[i.answer_from_user.id]:
                             del scores[i.answer_from_user.id][j.answer_from_user.id]
 
-                else:
-                    if j.text != i.text and j.answer_from_user.id in scores[i.answer_from_user.id]:
-                        scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 400
+                elif question_id == j.answer_to_question.mapped.id:
+                    if j.answer_from_user.id in scores[i.answer_from_user.id]:
+                        if j.text != i.text and j.answer_from_user.id in scores[i.answer_from_user.id] :
+                            scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 400
+                        else:
+                            scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 200
 
         scores = UsersView.career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id)
         
