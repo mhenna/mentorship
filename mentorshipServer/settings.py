@@ -77,6 +77,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mentorshipServer.urls'
 
+ALLOWED_HOSTS= ['*']
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
