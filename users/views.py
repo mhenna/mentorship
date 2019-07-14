@@ -290,13 +290,13 @@ class UsersView(APIView):
         email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentor.last_name + 
         ',\nYou have been unmatched with Mr ' + mentee.first_name + ' ' + mentee.last_name + '.\n' +
         'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
-        'Sincerely, \nMentorship Team', 'mentoship@dell.com', [mentor.email])
+        'Sincerely, \nMentorship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
         email.send()
 
         email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentee.last_name + 
         ',\nYou have been unmatched with Mr ' + mentor.first_name + ' ' + mentor.last_name + '.\n' + 
         'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
-        'Sincerely, \nMentoship Team', 'mentoship@dell.com', [mentee.email])
+        'Sincerely, \nMentoship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
         email.send()
         return Response({"message":"user unmatched successfully"}, status=status.HTTP_200_OK)
     
