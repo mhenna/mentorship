@@ -20,3 +20,10 @@ class AnswerUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ('id', 'users', 'questions', 'text')
+
+
+class AnswerLinkUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = '__all__'
+        depth = 1
