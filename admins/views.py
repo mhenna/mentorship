@@ -60,10 +60,17 @@ class AdminView(APIView):
     @api_view(['DELETE'])
     @permission_classes([IsAdmin])
     def delete(request):
-        queryset = Employee.objects.all()
-        queryset = queryset.filter(user_id=request.data['user_id'])
-        queryset.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            print("In delete", request.data['id'])
+            # queryset = Employee.objects.all()
+            # queryset = queryset.filter(id=request.data['id'])
+            queryset = Employee.objects.get(id=request.data['id'])
+            print("This is the user" , queryset)
+            queryset.delete()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response({'detail': 'Failed to delete user'},
+                            status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     @api_view(['POST'])

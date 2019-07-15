@@ -5,11 +5,18 @@ import re
 from .models import Employee, BusinessUnits
 from answers.serializers import  AnswerSerializer
 
+class UserEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ('email',)
+
 class UserRetrieveSerializer(serializers.ModelSerializer):
     # answers = AnswerSerializer(many=True, read_only=True)
     class Meta:
         model = Employee
-        fields = '__all__'
+        fields = ('id', 'email','first_name','last_name','is_mentor', 'departement',
+       'capacity','years_of_experience','years_within_organization','years_in_role',
+       'matched','cycles')
 
 class UserAnswerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,23 +27,28 @@ class UserListSerializer(serializers.ModelSerializer):
     def validate(self, data):
         from django.utils import timezone
         from cycles.models import Deadline
+        from cycles.models import Startdate
         
-        deadline = Deadline.objects.first()
+        deadline = Deadline.objects.filter(cycle=data.get('cycles')[0].id)
+        start = Startdate.objects.filter(cycle=data.get('cycles')[0].id)
+        
         now = timezone.now()
         if data['is_mentor'] == True :
-            if now > deadline.mentor_DeadlineRegistration:
+            if  (now > deadline[0].mentor_DeadlineRegistration) or (now < start[0].mentor_StartRegistration):
             #    datetime.date(datetime.today()) > form.date_deadline:
+              
                 message = 'You\'ve reached the deadline for the registration.'
                 raise serializers.ValidationError(message)
+            
         else:
             if data['is_mentor'] == False :
-                if now > deadline.mentee_DeadlineRegistration:
+                if  (now > deadline[0].mentee_DeadlineRegistration) or (now < start[0].mentee_StartRegistration):
                     message = 'You\'ve reached the deadline for the registration.'
                     raise serializers.ValidationError(message)
         
         email = data.get('email')
         cycles = data.get('cycles')
-        print("***", type(cycles), " ", cycles[0].name)
+
         
         if Employee.objects.filter(email=email).filter(cycles=cycles[0].id):
             raise IntegrityError('Email %s already exists for cycle id %s' % (email, cycles[0].id))
