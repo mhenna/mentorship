@@ -9,6 +9,6 @@ urlpatterns = [
     path('unmatch', views.UsersView.unMatchUsers),
     path('BUs', views.UsersView.bulk_insert_business_units),
     path('getBUs', views.BusinessUnitsRetrieve.as_view()),
-    path('a', views.SendEmail.send),        
-    path('user/<email>', views.UserRetrieveView.as_view(),name='get-user')
+    path('business-unit-not-listed', views.EmailSendingView.business_unit_not_listed),        
+    path('user/<email>', views.UserRetrieveView.as_view(),name='get-user'),
 ]

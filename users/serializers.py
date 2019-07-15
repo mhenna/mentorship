@@ -6,7 +6,7 @@ from .models import Employee, BusinessUnits
 from answers.serializers import  AnswerSerializer
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
-    answers = AnswerSerializer(many=True, read_only=True)
+    # answers = AnswerSerializer(many=True, read_only=True)
     class Meta:
         model = Employee
         fields = '__all__'

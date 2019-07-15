@@ -16,12 +16,14 @@ class DeadlineListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deadline
         fields = '__all__'
+        depth = 1
 
 
 class StartDateListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Startdate
         fields = '__all__'
+        depth = 1
 
 
 class SkillsListSerializer(serializers.ModelSerializer):
