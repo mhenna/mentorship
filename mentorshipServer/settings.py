@@ -164,3 +164,13 @@ EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_PORT')
 EMAIL_USE_TLS = env('EMAIL_USE_TLS')
 MENTOR_URL = env('MENTOR_URL')
+
+
+"""
+This is for deployment
+"""
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = 'portal.mentorship@gmail.com'
+# EMAIL_HOST_PASSWORD = 'TechDev123!'
+# EMAIL_PORT = 587
