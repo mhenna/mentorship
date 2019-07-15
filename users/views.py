@@ -27,6 +27,7 @@ import string
 import copy
 from answers.views import AnswersListCreateUsers
 from answers.serializers import AnswerUserSerializer
+from django.core.mail import EmailMessage
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
@@ -262,6 +263,20 @@ class UsersView(APIView):
         except Exception as e:
             print(e)
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        email = EmailMessage('You Have Been Matched', 'Hello Mr ' + mentor.last_name + 
+        ',\nYou have been matched to mentor Mr ' + mentee.first_name + ' ' + mentee.last_name + '.\n'
+        'This is their contact details:\n' + 
+        'Email: ' + mentee.email + '\n\n' + 
+        'Sincerely, \nMentorship Team', 'mentorship@7amada.com', [mentor.email])
+        email.send()
+
+        email = EmailMessage('You Have Been Matched', 'Hello Mr ' + mentee.last_name + 
+        ',\nYou have been matched to be mentored by Mr ' + mentor.first_name + ' ' + mentor.last_name + '.\n'
+        'This is their contact details:\n' + 
+        'Email: ' + mentor.email + '\n\n' +
+        'Sincerely, \nMentorship Team', 'mentorship@7amada.com', [mentee.email])
+        email.send()
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
     
     @api_view(['POST'])    
@@ -276,7 +291,19 @@ class UsersView(APIView):
             mentor.save()
         except Exception as e:
             print(e)
-            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentor.last_name + 
+        ',\nYou have been unmatched with Mr ' + mentee.first_name + ' ' + mentee.last_name + '.\n' +
+        'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
+        'Sincerely, \nMentorship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
+        email.send()
+
+        email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentee.last_name + 
+        ',\nYou have been unmatched with Mr ' + mentor.first_name + ' ' + mentor.last_name + '.\n' + 
+        'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
+        'Sincerely, \nMentoship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
+        email.send()
         return Response({"message":"user unmatched successfully"}, status=status.HTTP_200_OK)
     
     @api_view(['POST'])
