@@ -32,13 +32,14 @@ from django.core.mail import EmailMessage
 class UsersEmailView(ListCreateAPIView):
     def get(self, request, format=None):
         """
-        Return a list of all business units.
+        Return a list of all user emails.
         """
         emails = [user.email for user in Employee.objects.all()]
+        serializer_class = UserRetrieveSerializer
         return Response(emails)
 
 class UserListCreateView(ListCreateAPIView):
-    queryset = Employee.objects.raw('SELECT * from users_employee') # nopep8
+    queryset = Employee.objects.all() # nopep8
     serializer_class = UserRetrieveSerializer
 
 class AddSkill(APIView):
