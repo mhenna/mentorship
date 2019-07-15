@@ -17,7 +17,7 @@ import json
 from .models import Employee, BusinessUnits
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer
+from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer, UserEmailSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -29,9 +29,17 @@ from answers.views import AnswersListCreateUsers
 from answers.serializers import AnswerUserSerializer
 from django.core.mail import EmailMessage
 
+class UsersEmailView(ListCreateAPIView):
+    def get(self, request, format=None):
+        """
+        Return a list of all business units.
+        """
+        emails = [user.email for user in Employee.objects.all()]
+        return Response(emails)
+
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
-    serializer_class = UserRetrieveSerializer
+    serializer_class = UserListSerializer
 
 class AddSkill(APIView):
     @api_view(['PUT'])
