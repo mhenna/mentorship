@@ -68,7 +68,7 @@ class AdminView(APIView):
             queryset = Employee.objects.get(id=request.data['id'])
             print("This is the user" , queryset)
             queryset.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_200_OK)
         except:
             return Response({'detail': 'Failed to delete user'},
                             status.HTTP_500_INTERNAL_SERVER_ERROR)
