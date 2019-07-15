@@ -59,20 +59,22 @@ class DeadlineView(APIView):
     def Edit(request):
         try:
             query = Deadline.objects.all()
-            queryset = query.filter(id=request.data['id'])
+            queryset = query.filter(cycle=request.data['cycle'])
 
             if not queryset:
-                query = Deadline(id=request.data['id'], mentor_DeadlineRegistration = request.data['mentor'], mentee_DeadlineRegistration = request.data['mentee'])
+                cycle = Cycle.objects.get(id=request.data['cycle'])
+                query = Deadline(mentor_DeadlineRegistration = request.data['mentor'], mentee_DeadlineRegistration = request.data['mentee'], cycle = cycle)
                 query.save()
             else:
-                query = Deadline.objects.get(id=request.data['id'])
-                print("*************8283792739******** ", query.id)
+                cycle = Cycle.objects.get(id=request.data['cycle'])
+                query = Deadline.objects.get(cycle=cycle)
                 query.mentor_DeadlineRegistration = request.data['mentor']
                 query.mentee_DeadlineRegistration = request.data['mentee']
                 query.save(update_fields=['mentor_DeadlineRegistration','mentee_DeadlineRegistration'])
                 
         except Exception as e:
-            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(e)
+            return Response({'message': "ERROR"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer_class = DeadlineListSerializer
         return Response(status=status.HTTP_200_OK)
 
@@ -85,27 +87,24 @@ class StartDateView(APIView):
     @api_view(['PUT'])
     @permission_classes([IsAdmin])
     def Edit(request):
-        print(request.data['id'])
         try:
             query = Startdate.objects.all()
-            queryset = query.filter(id=request.data['id'])
+            queryset = query.filter(cycle=request.data['cycle'])
 
             if not queryset:
-                query = Startdate(id=request.data['id'], mentor_StartRegistration = request.data['mentor'], mentee_StartRegistration = request.data['mentee'])
-                print('11')
+                cycle = Cycle.objects.get(id=request.data['cycle'])
+                query = Startdate(mentor_StartRegistration = request.data['mentor'], mentee_StartRegistration = request.data['mentee'], cycle = cycle)
                 query.save()
             else:
-                query = Startdate.objects.get(id=request.data['id'])
-                query.mentor_StartRegistration = request.data['mentor']
+                cycle = Cycle.objects.get(id=request.data['cycle'])
+                query = Startdate.objects.get(cycle=cycle)
+                query.mentor_StartRegistrationn = request.data['mentor']
                 query.mentee_StartRegistration = request.data['mentee']
                 query.save(update_fields=['mentor_StartRegistration','mentee_StartRegistration'])
-                print('12')
                 
-
-            print("This is query object", query)
-
         except Exception as e:
-            return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(e)
+            return Response({'message': "ERROR"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer_class = StartDateListSerializer
         return Response(status=status.HTTP_200_OK)
 
