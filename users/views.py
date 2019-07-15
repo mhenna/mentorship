@@ -40,7 +40,7 @@ class UsersEmailView(ListCreateAPIView):
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
-    serializer_class = UserRetrieveSerializer
+    serializer_class = UserListSerializer
 
 class AddSkill(APIView):
     @api_view(['PUT'])
