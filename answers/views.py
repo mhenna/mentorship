@@ -7,7 +7,7 @@ from .models import Answer
 from django.db.models import F
 from django.db.models import Prefetch
 from users.models import Employee
-from .serializers import AnswerListSerializer, AnswerSerializer, AnswerUserSerializer
+from .serializers import AnswerListSerializer, AnswerSerializer, AnswerUserSerializer, AnswerLinkUserSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -24,6 +24,11 @@ class AnswersListCreateUsers(ListCreateAPIView):
 class AnswersListCreate(ListCreateAPIView):
     queryset = Answer.objects.all()
     serializer_class = AnswerListSerializer 
+
+class AnswerListLinkUser(ListCreateAPIView):
+    queryset = Answer.objects.all()
+    serializer_class = AnswerLinkUserSerializer
+    
 
 class AnswerEditView(APIView):
 

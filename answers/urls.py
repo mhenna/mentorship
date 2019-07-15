@@ -8,4 +8,5 @@ urlpatterns = [
     path('users', views.AnswersListCreateUsers.as_view()),
     path('delete', views.AnswerEditView.DeleteAnswer),
     path('edit', views.AnswerEditView.EditAnswers),
+    path('getAnswers', views.AnswerListLinkUser.as_view()),
 ]
