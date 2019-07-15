@@ -357,4 +357,12 @@ class UserRetrieveView(RetrieveAPIView):
         self.check_object_permissions(self.request, obj)
         return obj
 
+class EmailSendingView(APIView):
 
+    @api_view(['POST'])
+    def business_unit_not_listed(request):
+        email = EmailMessage('Business Unit Not Listed', 'To Whom it may concern,\n\n' +
+        'We have found out that the {' + request.data['businessUnit'] + '} business unit is not in your list. This was due to one of our users signing up to the Mentorship Portal. \n\n' + 
+        'Sincerely, \nMentorship Team', 'mentorship@dell.com', to=['mostafa.henna@dell.com'])
+        email.send()
+        return Response({'Email Send'}, status=status.HTTP_200_OK)
