@@ -268,14 +268,14 @@ class UsersView(APIView):
         ',\nYou have been matched to mentor Mr ' + mentee.first_name + ' ' + mentee.last_name + '.\n'
         'This is their contact details:\n' + 
         'Email: ' + mentee.email + '\n\n' + 
-        'Sincerely, \nMentorship Team', 'mentorship@7amada.com', [mentor.email])
+        'Sincerely, \nMentorship Team', to=[mentor.email])
         email.send()
 
         email = EmailMessage('You Have Been Matched', 'Hello Mr ' + mentee.last_name + 
         ',\nYou have been matched to be mentored by Mr ' + mentor.first_name + ' ' + mentor.last_name + '.\n'
         'This is their contact details:\n' + 
         'Email: ' + mentor.email + '\n\n' +
-        'Sincerely, \nMentorship Team', 'mentorship@7amada.com', [mentee.email])
+        'Sincerely, \nMentorship Team', to=[mentee.email])
         email.send()
         return Response({"message":"user inserted successfully"}, status=status.HTTP_200_OK)
     
@@ -296,13 +296,13 @@ class UsersView(APIView):
         email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentor.last_name + 
         ',\nYou have been unmatched with Mr ' + mentee.first_name + ' ' + mentee.last_name + '.\n' +
         'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
-        'Sincerely, \nMentorship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
+        'Sincerely, \nMentorship Team', to=[mentor.email])
         email.send()
 
         email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentee.last_name + 
         ',\nYou have been unmatched with Mr ' + mentor.first_name + ' ' + mentor.last_name + '.\n' + 
         'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
-        'Sincerely, \nMentoship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
+        'Sincerely, \nMentoship Team', to=[mentee.email])
         email.send()
         return Response({"message":"user unmatched successfully"}, status=status.HTTP_200_OK)
     
