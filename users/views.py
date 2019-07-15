@@ -27,6 +27,18 @@ import string
 import copy
 from answers.views import AnswersListCreateUsers
 from answers.serializers import AnswerUserSerializer
+from django.core.mail import EmailMessage
+
+class SendEmail(APIView):
+    @api_view(['POST'])
+    def send(request):
+        try:
+            email = EmailMessage('test', 'test', to=['nada.elsammak@emc.com', 'mostafa.henna@emc.com'])
+            email.send()
+        except Exception as e:
+            print(e)
+            return Response({'ERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'EMAIL SENT'}, status=status.HTTP_200_OK)
 
 class UserListCreateView(ListCreateAPIView):
     queryset = Employee.objects.all() # nopep8
