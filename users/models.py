@@ -19,11 +19,16 @@ class Employee(models.Model):
     coaching = models.BooleanField(default=False)
     work_location = models.CharField(max_length=30,null=True)
     position = models.CharField(max_length=30,null=True)
-    departement = models.CharField(max_length=30,null=True)
+    departement = models.CharField(max_length=80,null=True)
     matched = models.ManyToManyField("self",related_name='matches',blank=True)    
     skills = models.ManyToManyField(Skill, related_name='employees',blank=True)
     cycles = models.ManyToManyField(Cycle, related_name='employee',blank=True)
     capacity =  models.IntegerField(null=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['email'])
+        ]
    
     def __str__(self):
         return self.email+" -- "+str(self.id)
