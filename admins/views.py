@@ -58,7 +58,6 @@ class AdminView(APIView):
                             status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @api_view(['DELETE'])
-    @permission_classes([IsAdmin])
     def delete(request):
         try:
             print("In delete", request.data['id'])
