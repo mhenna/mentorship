@@ -39,8 +39,12 @@ class UsersEmailView(ListCreateAPIView):
         return Response(emails)
 
 class UserListCreateView(ListCreateAPIView):
-    queryset = Employee.objects.all() # nopep8
+    queryset = Employee.objects.prefetch_related('matched', 'cycles','skills') # nopep8
     serializer_class = UserListSerializer
+
+# class k(ListCreateAPIView):
+#     queryset = AllUsers.objects.all()
+#     serializer_class = UserListSerializer
 
 class AddSkill(APIView):
     @api_view(['PUT'])
@@ -76,7 +80,8 @@ class UsersView(APIView):
         Loop over all mentors and check the answers to the questions to calculate the score
         """
 
-        queryset = Answer.objects.exclude(answer_from_user__isnull=True)
+        queryset = Answer.objects.prefetch_related('answer_to_question','answer_from_user')
+        queryset = queryset.filter(answer_from_user__isnull=False)
         serializer_class = AnswerUserSerializer
 
         mentor_answers, mentee_answers, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring, mentor_career_mentoring, mentee_career_mentoring_id, mentor_career_mentoring_id = UsersView.process_query(queryset)
@@ -273,15 +278,15 @@ class UsersView(APIView):
             print(e)
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        email = EmailMessage('You Have Been Matched', 'Hello Mr ' + mentor.last_name + 
-        ',\nYou have been matched to mentor Mr ' + mentee.first_name + ' ' + mentee.last_name + '.\n'
+        email = EmailMessage('You Have Been Matched', 'Hello ' + mentor.first_name + ' ' + mentor.last_name + 
+        ',\nYou have been matched to mentor ' + mentee.first_name + ' ' + mentee.last_name + '.\n'
         'This is their contact details:\n' + 
         'Email: ' + mentee.email + '\n\n' + 
         'Sincerely, \nMentorship Team', 'mentorship@7amada.com', [mentor.email])
         email.send()
 
-        email = EmailMessage('You Have Been Matched', 'Hello Mr ' + mentee.last_name + 
-        ',\nYou have been matched to be mentored by Mr ' + mentor.first_name + ' ' + mentor.last_name + '.\n'
+        email = EmailMessage('You Have Been Matched', 'Hello ' + mentee.first_name + ' ' + mentee.last_name +  
+        ',\nYou have been matched to be mentored by ' + mentor.first_name + ' ' + mentor.last_name + '.\n'
         'This is their contact details:\n' + 
         'Email: ' + mentor.email + '\n\n' +
         'Sincerely, \nMentorship Team', 'mentorship@7amada.com', [mentee.email])
@@ -302,14 +307,14 @@ class UsersView(APIView):
             print(e)
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentor.last_name + 
-        ',\nYou have been unmatched with Mr ' + mentee.first_name + ' ' + mentee.last_name + '.\n' +
+        email = EmailMessage('You Have Been Unmatched', 'Hello ' + mentor.first_name + ' ' + mentor.last_name +  
+        ',\nYou have been unmatched with ' + mentee.first_name + ' ' + mentee.last_name + '.\n' +
         'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
         'Sincerely, \nMentorship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
         email.send()
 
-        email = EmailMessage('You Have Been Unmatched', 'Hello Mr ' + mentee.last_name + 
-        ',\nYou have been unmatched with Mr ' + mentor.first_name + ' ' + mentor.last_name + '.\n' + 
+        email = EmailMessage('You Have Been Unmatched', 'Hello ' + mentee.first_name + ' ' + mentee.last_name +
+        ',\nYou have been unmatched with ' + mentor.first_name + ' ' + mentor.last_name + '.\n' + 
         'This is an action done by the portal admin for the greater good of everyone.\n\n' + 
         'Sincerely, \nMentoship Team', 'mentoship@dell.com', ['mostafa.henna@dell.com'])
         email.send()

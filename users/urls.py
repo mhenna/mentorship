@@ -12,4 +12,5 @@ urlpatterns = [
     path('business-unit-not-listed', views.EmailSendingView.business_unit_not_listed),
     path('getUserEmails', views.UsersEmailView.as_view()),      
     path('user/<email>', views.UserRetrieveView.as_view(),name='get-user'),
+    # path('a', views.k.as_view()),
 ]
