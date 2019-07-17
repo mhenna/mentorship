@@ -34,6 +34,7 @@ class UserListSerializer(serializers.ModelSerializer):
         
         now = timezone.now()
         if data['is_mentor'] == True :
+            print(now, deadline)
             if  (now > deadline[0].mentor_DeadlineRegistration) or (now < start[0].mentor_StartRegistration):
             #    datetime.date(datetime.today()) > form.date_deadline:
               
