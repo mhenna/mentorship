@@ -100,9 +100,6 @@ WSGI_APPLICATION = 'mentorshipServer.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 db_name =  env('DB_NAME')
-print(db_name,"HHHHHHHHHHHHH")
-from django.utils import timezone
-print(timezone.now())
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
