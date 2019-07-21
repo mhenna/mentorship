@@ -1,4 +1,5 @@
 from django.db import models
+# from dbview import DbView
 
 # Create your models here.
 import uuid
@@ -39,7 +40,6 @@ class BusinessUnits(models.Model):
 
    
     # matched = models.ForeignKey('self',related_name='matches',on_delete=models.CASCADE, null=True)
-
 
 
     
