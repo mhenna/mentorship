@@ -34,7 +34,6 @@ class AdminView(APIView):
     @api_view(['POST'])
     @permission_classes([IsAdmin])
     def invite(request):
-       
         try:
             template = Template(
                 '<p>You have been invited as a Mentor at ' +
@@ -58,55 +57,66 @@ class AdminView(APIView):
                             status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @api_view(['DELETE'])
+    @permission_classes([IsAdmin])
     def delete(request):
-        try:
-            print("In delete", request.data['id'])
-            # queryset = Employee.objects.all()
-            # queryset = queryset.filter(id=request.data['id'])
-            queryset = Employee.objects.get(id=request.data['id'])
-            print("This is the user" , queryset)
-            queryset.delete()
-            return Response(status=status.HTTP_200_OK)
-        except:
-            return Response({'detail': 'Failed to delete user'},
-                            status.HTTP_500_INTERNAL_SERVER_ERROR)
+        queryset = Employee.objects.all()
+        queryset = queryset.filter(user_id=request.data['user_id'])
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
     @api_view(['POST'])
     @permission_classes([IsAdmin])
     def SendEmail(request):
+        mentors = Employee.objects.filter(is_mentor=True)
+        mentees = Employee.objects.filtes(is_mentor=False)
+        emails = request.data.get('email')
+        email_list = emails.split(",")
+        
+        if (request.data.get('type')=='mentors'):
+            for email in mentors:
+                list.append(email.email)
+                emailMessage = EmailMessage('Dell Mentorship Portal', body,
+                                            list)
+        if (request.data.get('type')=='mentees'):
+            for email in mentees:
+                list.append(email.email)
+                emailMessage = EmailMessage('Dell Mentorship Portal', body,
+                                            list)
+            if (request.data.get('type')=='seperate'):
+                emailMessage = EmailMessage('Dell Mentorship Portal', body,
+                                        email_list)
+
+        """
         try:
             mentors = Employee.objects.filter(is_mentor=True)
             mentees = Employee.objects.filter(is_mentor=False)
             emails = request.data.get('email')
             email_list = emails.split(",")
             print("###############################", email_list)
-            sending_list = []
-            body = request.data.get('emailBody')
-           # template = Template(
-            #    '<p>{{body}}</p>')
-            #context = Context(
-             #   {'body': request.data.get('emailBody'),
-              #   })
-            #body = template.render(context)
+            list = []
+            template = Template(
+                '<p>{{body}}</p>')
+            context = Context(
+                {'body': request.data.get('emailBody'),
+                 })
+            body = template.render(context)
             if (request.data.get('type')=='mentors'):
                 for email in mentors:
-                    sending_list.append(email.email)
+                    list.append(email.email)
                 emailMessage = EmailMessage('Dell Mentorship Portal', body,
-                                            to=sending_list)
-                print('$$$$$$$$$$$$$$$$', sending_list, ' ', body)
+                                            list)
             if (request.data.get('type')=='mentees'):
                 for email in mentees:
-                    sending_list.append(email.email)
+                    list.append(email.email)
                 emailMessage = EmailMessage('Dell Mentorship Portal', body,
-                                            to=sending_list)
-                print('*****************', sending_list, ' ', body)
+                                            list)
             if (request.data.get('type')=='seperate'):
                 emailMessage = EmailMessage('Dell Mentorship Portal', body,
-                                        to=email_list)
+                                        email_list)
                 print(request.data)
                 print(request.data.get('emailBody'))
-            #emailMessage.content_subtype = "html"
+            emailMessage.content_subtype = "html"
             emailMessage.send()
             
             return Response({'detail': 'Email sent'},
@@ -116,3 +126,4 @@ class AdminView(APIView):
             return Response({'detail': 'Internal Server Error.'},
                             status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        """
