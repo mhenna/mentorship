@@ -77,6 +77,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mentorshipServer.urls'
 
+ALLOWED_HOSTS= ['*']
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -159,17 +160,18 @@ JWT_AUTH = {
     'JWT_SECRET_KEY': env('SECRET_KEY'),
     'JWT_VERIFY_EXPIRATION': False
 }
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = env('EMAIL_PORT')
-EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+
+#EMAIL_HOST = env('EMAIL_HOST')
+#EMAIL_PORT = env('EMAIL_PORT')
+#EMAIL_USE_TLS = env('EMAIL_USE_TLS')
 MENTOR_URL = env('MENTOR_URL')
 
 
 """
 This is for deployment
 """
-# EMAIL_USE_TLS = True
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'portal.mentorship@gmail.com'
-# EMAIL_HOST_PASSWORD = 'TechDev123!'
-# EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'portal.mentorship@gmail.com'
+EMAIL_HOST_PASSWORD = 'TechDev123!'
+EMAIL_PORT = 587
