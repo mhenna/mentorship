@@ -110,7 +110,7 @@ class UsersView(APIView):
                 this_mentor_id = j.answer_from_user.id
                 mentor_skills = []
 
-                if this_question_id == 12:
+                if this_question_id == 11:
                     mentor_skills = j.text
                     mentee_skills[i.answer_from_user.id] = i.text
 
@@ -239,9 +239,14 @@ class UsersView(APIView):
             question_id = i.answer_to_question.id
             mentee_info[i.answer_from_user.id] = {'email':i.answer_from_user.email, 'name': i.answer_from_user.first_name + ' ' + i.answer_from_user.last_name, 'years_of_experience': i.answer_from_user.years_of_experience, 'years_within_organization': i.answer_from_user.years_within_organization, 'skills_interested_in': mentee_skills[i.answer_from_user.id]}
             for j in mentor_answers_mcq:
-                if question_id == 8:
+                if question_id == 7:
                     if 'Yes' in mentee_answer:
                         if j.answer_from_user.departement == mentee_business_unit and j.answer_from_user.id in scores[i.answer_from_user.id]:
+                            del scores[i.answer_from_user.id][j.answer_from_user.id]
+
+                elif j.answer_to_question_id == 8:
+                    if 'Yes' in j.text:
+                        if mentee_business_unit == j.answer_from_user.departement and j.answer_from_user.id in scores[i.answer_from_user.id]:
                             del scores[i.answer_from_user.id][j.answer_from_user.id]
 
                 elif question_id == j.answer_to_question.mapped.id:
@@ -250,7 +255,7 @@ class UsersView(APIView):
                             scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 400
                         else:
                             scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 200
-
+            
         scores = UsersView.career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id)
         
         for i in scores.keys():
