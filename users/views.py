@@ -244,13 +244,18 @@ class UsersView(APIView):
                         if j.answer_from_user.departement == mentee_business_unit and j.answer_from_user.id in scores[i.answer_from_user.id]:
                             del scores[i.answer_from_user.id][j.answer_from_user.id]
 
+                elif j.answer_to_question_id == 8:
+                    if 'Yes' in j.text:
+                        if mentee_business_unit == j.answer_from_user.departement and j.answer_from_user.id in scores[i.answer_from_user.id]:
+                            del scores[i.answer_from_user.id][j.answer_from_user.id]
+
                 elif question_id == j.answer_to_question.mapped.id:
                     if j.answer_from_user.id in scores[i.answer_from_user.id]:
                         if j.text != i.text and j.answer_from_user.id in scores[i.answer_from_user.id] :
                             scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 400
                         else:
                             scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 200
-
+            
         scores = UsersView.career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id)
         
         for i in scores.keys():
