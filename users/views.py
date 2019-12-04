@@ -244,7 +244,7 @@ class UsersView(APIView):
                         if j.answer_from_user.departement == mentee_business_unit and j.answer_from_user.id in scores[i.answer_from_user.id]:
                             del scores[i.answer_from_user.id][j.answer_from_user.id]
 
-                elif j.answer_to_question_id == 8:
+                elif j.answer_to_question_id == 9:
                     if 'Yes' in j.text:
                         if mentee_business_unit == j.answer_from_user.departement and j.answer_from_user.id in scores[i.answer_from_user.id]:
                             del scores[i.answer_from_user.id][j.answer_from_user.id]
