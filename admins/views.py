@@ -53,7 +53,8 @@ class AdminView(APIView):
             return Response({'detail': 'Mentor has been invited.'},
                             status=status.HTTP_200_OK)
            
-        except SMTPException:
+        except SMTPException as e:
+            print(e)
             return Response({'detail': 'Internal Server Error.'},
                             status.HTTP_500_INTERNAL_SERVER_ERROR)
 
