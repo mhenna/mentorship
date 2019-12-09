@@ -29,6 +29,10 @@ from answers.views import AnswersListCreateUsers
 from answers.serializers import AnswerUserSerializer
 from django.core.mail import EmailMessage
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
+
 class UsersEmailView(ListCreateAPIView):
     def get(self, request, format=None):
         """
@@ -85,7 +89,7 @@ class UsersView(APIView):
         serializer_class = AnswerUserSerializer
 
         mentor_answers, mentee_answers, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring, mentor_career_mentoring, mentee_career_mentoring_id, mentor_career_mentoring_id = UsersView.process_query(queryset)
-        
+
         scores = {}
         max_options_size = 3
         extra_char_score = 40
@@ -104,7 +108,6 @@ class UsersView(APIView):
             tmp_answers = i.text
 
             result, actual_answer = UsersView.label_mentee_answers(tmp_answers)
-            
             for j in mentor_answers:
                 score = 0
                 this_mentor_id = j.answer_from_user.id
@@ -132,7 +135,8 @@ class UsersView(APIView):
                     j.answer_from_user.first_name + ' ' + j.answer_from_user.last_name, 
                     j.answer_from_user.years_of_experience, 
                     j.answer_from_user.years_within_organization, 
-                    mentor_skills)           
+                    mentor_skills,
+                    len(j.answer_from_user.matched.all()))           
 
         return scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id, mentee_skills
 
@@ -145,6 +149,7 @@ class UsersView(APIView):
         mentor_career_mentoring =  queryset.filter(answer_from_user__is_mentor=True, text__contains='{"Career mentoring"}')
         mentee_career_mentoring_id=[]
         mentor_career_mentoring_id=[]
+        
         for i in mentee_career_mentoring:
             mentee_career_mentoring_id.append(i.answer_from_user.id)
         for i in mentor_career_mentoring:
@@ -158,17 +163,17 @@ class UsersView(APIView):
 
         return result, actual_answer
     
-    def store_mentor_score(this_mentee_id, scores, this_mentor_id, capacity, score, mentor_email, mentor_name, mentor_years_of_experience, mentor_years_within_organization, mentor_skills):
+    def store_mentor_score(this_mentee_id, scores, this_mentor_id, capacity, score, mentor_email, mentor_name, mentor_years_of_experience, mentor_years_within_organization, mentor_skills, mentor_matches):
         if this_mentee_id not in scores:
-            scores[this_mentee_id] = {this_mentor_id : {'score' : score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}}
+            scores[this_mentee_id] = {this_mentor_id : {'score' : score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills, 'matched_with': mentor_matches}}
         elif this_mentor_id not in scores[this_mentee_id].keys():
-            scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}})
+            scores[this_mentee_id].update({this_mentor_id : {'score': score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills, 'matched_with': mentor_matches}})
         else:
             # scores[this_mentee_id][this_mentor_id]['score']= scores[this_mentee_id][this_mentor_id]['score'] + score
             if len(scores[this_mentee_id][this_mentor_id]['skills']) == 0:
-                scores[this_mentee_id].update({this_mentor_id : {'score': scores[this_mentee_id][this_mentor_id]['score'] + score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills}})
+                scores[this_mentee_id].update({this_mentor_id : {'score': scores[this_mentee_id][this_mentor_id]['score'] + score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': mentor_skills, 'matched_with': mentor_matches}})
             else:
-                scores[this_mentee_id].update({this_mentor_id : {'score': scores[this_mentee_id][this_mentor_id]['score'] + score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': scores[this_mentee_id][this_mentor_id]['skills']}})
+                scores[this_mentee_id].update({this_mentor_id : {'score': scores[this_mentee_id][this_mentor_id]['score'] + score, 'capacity':capacity, 'email': mentor_email, 'name': mentor_name, 'years_of_experience': mentor_years_of_experience, 'years_within_organization': mentor_years_within_organization, 'skills': scores[this_mentee_id][this_mentor_id]['skills'], 'matched_with': mentor_matches}})
 
 
         return scores
@@ -233,6 +238,9 @@ class UsersView(APIView):
         scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id, mentee_skills = UsersView.score()
         sorted_scores = {}
         mentee_info = {}
+
+        seen_mentor_mentee_pair = set()
+
         for i in mentee_answers_mcq:
             mentee_answer = i.text
             mentee_business_unit = i.answer_from_user.departement
@@ -255,7 +263,21 @@ class UsersView(APIView):
                             scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 400
                         else:
                             scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + 200
-            
+
+
+                # Increase score based on mentor's available capacity
+                try:
+                    if (i.answer_from_user.id, j.answer_from_user.id) not in seen_mentor_mentee_pair:
+                        if scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with'] > 0 and scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with'] < j.answer_from_user.capacity:
+                            scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + (400*scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with']/j.answer_from_user.capacity)
+                        elif scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with'] == j.answer_from_user.capacity:
+                            del scores[i.answer_from_user.id][j.answer_from_user.id]
+                        
+                        seen_mentor_mentee_pair.add((i.answer_from_user.id, j.answer_from_user.id))
+                except:
+                    pass
+
+
         scores = UsersView.career_mentoring_elimination(scores, mentee_career_mentoring_id, mentor_career_mentoring_id)
         
         for i in scores.keys():
