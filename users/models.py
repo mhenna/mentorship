@@ -21,6 +21,7 @@ class Employee(models.Model):
     work_location = models.CharField(max_length=30,null=True)
     position = models.CharField(max_length=30,null=True)
     departement = models.CharField(max_length=80,null=True)
+    empLevel = models.CharField(max_length=20,null=True)
     matched = models.ManyToManyField("self",related_name='matches',blank=True)    
     skills = models.ManyToManyField(Skill, related_name='employees',blank=True)
     cycles = models.ManyToManyField(Cycle, related_name='employee',blank=True)
@@ -38,8 +39,5 @@ class Employee(models.Model):
 class BusinessUnits(models.Model):
     business_unit = models.TextField(max_length=350)
 
-   
-    # matched = models.ForeignKey('self',related_name='matches',on_delete=models.CASCADE, null=True)
-
-
-    
+class EmploymentLevels(models.Model):
+    level = models.TextField(max_length=20)
