@@ -36,7 +36,7 @@ class SkillListCreateView(ListCreateAPIView):
 class AddSkill(UpdateAPIView):
     queryset= Cycle.objects.all() 
     serializer_class = CycleListSerializer
-    permission_classes = (IsAdmin,)
+    # permission_classes = (IsAdmin,)
     def put(self, data, format=None):
         queryset = Cycle.objects.get(id=self.request.data['id'])
         try:

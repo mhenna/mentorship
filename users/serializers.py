@@ -21,7 +21,7 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 class UserAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
-        fields = ('id', 'is_mentor', 'departement', 'email', 'capacity')
+        fields = ('id', 'is_mentor', 'departement', 'email', 'capacity', 'matched')
 
 class UserListSerializer(serializers.ModelSerializer):
     def validate(self, data):
