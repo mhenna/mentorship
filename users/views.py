@@ -14,10 +14,10 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 from django.http import HttpResponse
 import json
-from .models import Employee, BusinessUnits
+from .models import Employee, BusinessUnits, EmploymentLevels
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer, UserEmailSerializer
+from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer, UserEmailSerializer, EmploymentLevels
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -360,6 +360,19 @@ class UsersView(APIView):
         BusinessUnits.objects.bulk_create(db_entries)
         return Response({"message":"hi"}, status=status.HTTP_200_OK)
 
+    @api_view(['POST'])
+    def bulk_insert_employment_levels(request):
+        data = open('EmpLevels.txt', 'r')
+        separated_data = data.read().split('\n')
+        db_entries = [
+            EmploymentLevels(
+                level=i
+            )
+            for i in separated_data
+        ]
+        EmploymentLevels.objects.bulk_create(db_entries)
+        return Response({"message":"hi"}, status=status.HTTP_200_OK)
+
 class BusinessUnitsRetrieve(APIView):
     def get(self, request, format=None):
         """
@@ -367,6 +380,14 @@ class BusinessUnitsRetrieve(APIView):
         """
         business_units = [bu.business_unit for bu in BusinessUnits.objects.all()]
         return Response(business_units)
+
+class EmploymentLevelsRetrieve(APIView):
+    def get(self, request, format=None):
+        """
+        Return a list of all employment levels.
+        """
+        employment_levels = [emp_level.level for emp_level in EmploymentLevels.objects.all()]
+        return Response(employment_levels)
 
 class UserRetrieveView(RetrieveAPIView):
     queryset = Employee.objects.all()     
