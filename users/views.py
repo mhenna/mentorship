@@ -238,7 +238,7 @@ class UsersView(APIView):
         scores, mentor_answers_mcq, mentee_answers_mcq, mentee_career_mentoring_id, mentor_career_mentoring_id, mentee_skills = UsersView.score()
         sorted_scores = {}
         mentee_info = {}
-
+        mentors_with_max_capacity = set()
         seen_mentor_mentee_pair = set()
 
         for i in mentee_answers_mcq:
@@ -271,7 +271,7 @@ class UsersView(APIView):
                         if scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with'] > 0 and scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with'] < j.answer_from_user.capacity:
                             scores[i.answer_from_user.id][j.answer_from_user.id]['score'] = scores[i.answer_from_user.id][j.answer_from_user.id]['score'] + (400*scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with']/j.answer_from_user.capacity)
                         elif scores[i.answer_from_user.id][j.answer_from_user.id]['matched_with'] == j.answer_from_user.capacity:
-                            del scores[i.answer_from_user.id][j.answer_from_user.id]
+                            mentors_with_max_capacity.add(j.answer_from_user.email)
                         
                         seen_mentor_mentee_pair.add((i.answer_from_user.id, j.answer_from_user.id))
                 except:
@@ -284,7 +284,7 @@ class UsersView(APIView):
             sorted_scores[i] = sorted(scores[i].items(), key = lambda x: (x[1]['score']))
 
         returned_scores = UsersView.convert_scores_to_json(sorted_scores, mentee_info)
-        
+        returned_scores.append(mentors_with_max_capacity)
         return Response(returned_scores, status=status.HTTP_200_OK)
 
     @api_view(['POST'])    
