@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_jwt import utils
 from django.db.utils import IntegrityError
 import re
-from .models import Employee, BusinessUnits
+from .models import Employee, BusinessUnits, EmploymentLevels
 from answers.serializers import  AnswerSerializer
 
 class UserEmailSerializer(serializers.ModelSerializer):
@@ -21,17 +21,29 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 class UserAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
-        fields = ('id', 'is_mentor', 'departement', 'email', 'capacity')
+        fields = ('id', 'is_mentor', 'departement', 'email', 'capacity', 'matched')
 
 class UserListSerializer(serializers.ModelSerializer):
     def validate(self, data):
         from django.utils import timezone
+        from django.db.models import Sum
         from cycles.models import Deadline
         from cycles.models import Startdate
+        import math
         
         deadline = Deadline.objects.filter(cycle=data.get('cycles')[0].id)
         start = Startdate.objects.filter(cycle=data.get('cycles')[0].id)
         
+        mentee_count = Employee.objects.filter(cycles=data.get('cycles')[0].id, is_mentor=False).count()
+        mentor_capacity = Employee.objects.filter(cycles=data.get('cycles')[0].id, is_mentor=True).aggregate(Sum('capacity'))
+        
+        if (mentor_capacity['capacity__sum'] is None):
+            mentor_capacity['capacity__sum'] = 0
+
+        if math.ceil(mentor_capacity['capacity__sum'] + (mentor_capacity['capacity__sum'] * 0.1)) <= mentee_count:
+            message = 'There are too many mentees registered in this cycle. Please try next cycle.'
+            raise serializers.ValidationError(message)
+
         now = timezone.now()
         if data['is_mentor'] == True :
             if  (now > deadline[0].mentor_DeadlineRegistration) or (now < start[0].mentor_StartRegistration):
@@ -75,4 +87,9 @@ class UserListSerializer(serializers.ModelSerializer):
 class BusinessUnitsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessUnits
+        fields = '__all__'
+
+class EmploymentLevelsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmploymentLevels
         fields = '__all__'

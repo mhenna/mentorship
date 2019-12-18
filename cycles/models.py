@@ -7,7 +7,7 @@ from django.utils import timezone
 
 
 class Skill(models.Model):
-    name = models.CharField(max_length=30,unique=True,null=True)
+    name = models.CharField(max_length=300,unique=True,null=True)
     type = models.CharField(max_length=30,null=True)
 
 
