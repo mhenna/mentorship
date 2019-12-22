@@ -40,7 +40,7 @@ class UserListSerializer(serializers.ModelSerializer):
         if (mentor_capacity['capacity__sum'] is None):
             mentor_capacity['capacity__sum'] = 0
 
-        if math.ceil(mentor_capacity['capacity__sum'] + (mentor_capacity['capacity__sum'] * 0.1)) <= mentee_count:
+        if math.ceil(mentor_capacity['capacity__sum'] + (mentor_capacity['capacity__sum'] * 0.1)) <= mentee_count and mentor_capacity['capacity__sum'] != 0:
             message = 'There are too many mentees registered in this cycle. Please try next cycle.'
             raise serializers.ValidationError(message)
 
