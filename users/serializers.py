@@ -27,10 +27,12 @@ class UserListSerializer(serializers.ModelSerializer):
     def validate(self, data):
         from django.utils import timezone
         from django.db.models import Sum
+        from django.utils.dateparse import parse_datetime
         from cycles.models import Deadline
         from cycles.models import Startdate
         import math
-        
+        import datetime
+        import pytz
         deadline = Deadline.objects.filter(cycle=data.get('cycles')[0].id)
         start = Startdate.objects.filter(cycle=data.get('cycles')[0].id)
         
@@ -44,7 +46,7 @@ class UserListSerializer(serializers.ModelSerializer):
             message = 'There are too many mentees registered in this cycle. Please try next cycle.'
             raise serializers.ValidationError(message)
 
-        now = timezone.now()
+        now = parse_datetime(self.context['request'].data['now'])
         if data['is_mentor'] == True :
             if  (now > deadline[0].mentor_DeadlineRegistration) or (now < start[0].mentor_StartRegistration):
             #    datetime.date(datetime.today()) > form.date_deadline:

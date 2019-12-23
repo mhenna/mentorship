@@ -111,8 +111,10 @@ class CycleEditView(APIView):
     def DeleteCycle(request):
         queryset = Cycle.objects.all()
         queryset = queryset.filter(id=request.data['id'])
+        skill_queryset = Skill.objects.all()
         try:
             queryset.delete()
+            skill_queryset.delete()
         except Exception as e:
             return Response({'message':'Something went wrong.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_204_NO_CONTENT)
