@@ -10,7 +10,7 @@ urlpatterns = [
     path('BUs', views.UsersView.bulk_insert_business_units),
     path('EmpLevels', views.UsersView.bulk_insert_employment_levels),
     path('getBUs', views.BusinessUnitsRetrieve.as_view()),
-    path('getEmpLevels', views.EmploymentLevelsRetrieve.as_view()),
+    path('getEmpLevels/<can_mentor>', views.EmploymentLevelsRetrieve.as_view()),
     path('business-unit-not-listed', views.EmailSendingView.business_unit_not_listed),
     path('getUserEmails', views.UsersEmailView.as_view()),      
     path('user/<email>', views.UserRetrieveView.as_view(),name='get-user'),

@@ -17,7 +17,7 @@ import json
 from .models import Employee, BusinessUnits, EmploymentLevels
 from answers.models import Answer
 from cycles.models import Cycle
-from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer, UserEmailSerializer, EmploymentLevels
+from .serializers import UserRetrieveSerializer,UserListSerializer, BusinessUnitsListSerializer, UserEmailSerializer, EmploymentLevelsListSerializer
 from answers.serializers import AnswerListSerializer
 from questions.models import Question
 from cycles.models import Deadline
@@ -366,7 +366,8 @@ class UsersView(APIView):
         separated_data = data.read().split('\n')
         db_entries = [
             EmploymentLevels(
-                level=i
+                level=i.split()[0],
+                can_mentor=i.split()[1]
             )
             for i in separated_data
         ]
@@ -381,13 +382,18 @@ class BusinessUnitsRetrieve(APIView):
         business_units = [bu.business_unit for bu in BusinessUnits.objects.all()]
         return Response(business_units)
 
-class EmploymentLevelsRetrieve(APIView):
-    def get(self, request, format=None):
+class EmploymentLevelsRetrieve(ListAPIView):
+    serializer_class = EmploymentLevelsListSerializer
+    def get_queryset(self):
         """
         Return a list of all employment levels.
         """
-        employment_levels = [emp_level.level for emp_level in EmploymentLevels.objects.all()]
-        return Response(employment_levels)
+        can_mentor = self.kwargs['can_mentor']
+        if can_mentor is 't':
+            queryset = EmploymentLevels.objects.all()
+        else:
+            queryset = EmploymentLevels.objects.filter(can_mentor=can_mentor)
+        return queryset
 
 class UserRetrieveView(RetrieveAPIView):
     queryset = Employee.objects.all()     

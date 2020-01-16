@@ -41,10 +41,11 @@ class UserListSerializer(serializers.ModelSerializer):
         
         if (mentor_capacity['capacity__sum'] is None):
             mentor_capacity['capacity__sum'] = 0
-
-        if math.ceil(mentor_capacity['capacity__sum'] + (mentor_capacity['capacity__sum'] * 0.1)) <= mentee_count and mentor_capacity['capacity__sum'] != 0:
-            message = 'There are too many mentees registered in this cycle. Please try next cycle.'
-            raise serializers.ValidationError(message)
+        
+        if (data.get('is_mentor') is False):
+            if math.ceil(mentor_capacity['capacity__sum'] + (mentor_capacity['capacity__sum'] * 0.1)) <= mentee_count:
+                message = 'There are too many mentees registered in this cycle. Please try next cycle.'
+                raise serializers.ValidationError(message)
 
         now = parse_datetime(self.context['request'].data['now'])
         if data['is_mentor'] == True :
@@ -94,4 +95,4 @@ class BusinessUnitsListSerializer(serializers.ModelSerializer):
 class EmploymentLevelsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmploymentLevels
-        fields = '__all__'
+        fields = ('level',)
