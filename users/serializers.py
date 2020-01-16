@@ -95,4 +95,8 @@ class BusinessUnitsListSerializer(serializers.ModelSerializer):
 class EmploymentLevelsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmploymentLevels
+<<<<<<< HEAD
         fields = ('level',)
+=======
+        fields = '__all__'
+>>>>>>> 05a079ed012d0d6907f4cc0e3ff068ddea18f853
