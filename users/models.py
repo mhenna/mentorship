@@ -9,6 +9,7 @@ from cycles.models import Cycle, Skill
 
 class Employee(models.Model):
     email = models.CharField(max_length=300)
+    employment_id = models.CharField(max_length=20,null=True)
     first_name = models.CharField(max_length=30,null=True)
     last_name = models.CharField(max_length=30,null=True)    
     direct_manager = models.CharField(max_length=30,null=True)
@@ -41,3 +42,4 @@ class BusinessUnits(models.Model):
 
 class EmploymentLevels(models.Model):
     level = models.TextField(max_length=20)
+    can_mentor = models.BooleanField(default=False)
