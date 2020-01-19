@@ -389,7 +389,7 @@ class EmploymentLevelsRetrieve(ListAPIView):
         Return a list of all employment levels.
         """
         can_mentor = self.kwargs['can_mentor']
-        if can_mentor is 't':
+        if can_mentor is 'f':
             queryset = EmploymentLevels.objects.all()
         else:
             queryset = EmploymentLevels.objects.filter(can_mentor=can_mentor)
@@ -431,6 +431,6 @@ class EmailSendingView(APIView):
     def business_unit_not_listed(request):
         email = EmailMessage('Business Unit Not Listed', 'To Whom it may concern,\n\n' +
         'We have found out that the {' + request.data['businessUnit'] + '} business unit is not in your list. This was due to one of our users signing up to the Mentorship Portal. \n\n' + 
-        'Sincerely, \nMentorship Team', 'mentorship@dell.com', to=['mostafa.henna@dell.com'])
+        'Sincerely, \nMentorship Team', 'noreply@egyptcoe.com', to=['internalcoms@dell.com'])
         email.send()
         return Response({'Email Send'}, status=status.HTTP_200_OK)

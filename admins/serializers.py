@@ -21,9 +21,9 @@ class RegisterationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
-        regex = re.compile('^[a-zA-Z0-9_.+-]+@(?:(?:[a-zA-Z0-9-]+.)?[a-zA-Z]+.)?(dell|emc).com$')
+        regex = re.compile('^[a-zA-Z0-9_.+-]+@(?:(?:[a-zA-Z0-9-]+.)?[a-zA-Z]+.)?(dell|emc|rsa).com$')
         if not regex.match(value):
-            raise serializers.ValidationError('Must register using a dell domain.')
+            raise serializers.ValidationError('Must register using a dell technologies domain.')
         if User.objects.filter(email=value):
             raise serializers.ValidationError("Email already registered.")
         return value

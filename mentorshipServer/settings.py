@@ -171,7 +171,11 @@ MENTOR_URL = env('MENTOR_URL')
 This is for deployment
 """
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'portal.mentorship@gmail.com'
-EMAIL_HOST_PASSWORD = 'TechDev123!'
+EMAIL_HOST = 'smtp.office365.com'
+#EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'noreply@egyptcoe.com'
+#EMAIL_HOST_USER = 'portal.mentorship@gmail.com'
+EMAIL_HOST_PASSWORD = 'Veegasgoes2school'
+#EMAIL_HOST_PASSWORD = 'TechDev123!'
 EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = 'noreply@egyptcoe.com'
